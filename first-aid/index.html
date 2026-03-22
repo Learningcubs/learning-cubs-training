@@ -105,6 +105,8 @@ img{max-width:100%;height:auto}
 .kc-submit{margin-top:14px;background:var(--navy);color:var(--white);border:none;padding:10px 24px;border-radius:8px;font-family:var(--font-d);font-weight:600;font-size:.9rem;cursor:pointer;transition:all .2s}
 .kc-submit:hover{background:var(--teal)}
 .kc-submit:disabled{opacity:.4;cursor:not-allowed}
+.kc-gated{display:none}
+.kc-gated.unlocked{display:block}
 
 .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:8px;font-family:var(--font-d);font-weight:700;font-size:.92rem;border:none;cursor:pointer;transition:all .25s;text-decoration:none}
 .btn-primary{background:var(--teal);color:var(--white)}
@@ -895,7 +897,8 @@ function showErr(m){document.getElementById('loginError').textContent=m}
 /* ═══ PROGRESS PERSISTENCE ═════════════════════════════════ */
 function saveProgress(){
   if(!S.email)return;
-  var data={completed:S.completed,ts:Date.now()};
+  var data={completed:S.completed,currentMod:S.current,ts:Date.now()};
+  try{sessionStorage.setItem('lcpfa_session_'+S.email,JSON.stringify({email:S.email,name:S.name,failCount:S.failCount||0,maxAttempts:S.maxAttempts||3,config:S.config||{},certInfo:S.certInfo||null}))}catch(e){}
   try{localStorage.setItem('lcpfa_'+S.email,JSON.stringify(data))}catch(e){}
 }
 function loadProgress(){
@@ -906,6 +909,7 @@ function loadProgress(){
     var data=JSON.parse(raw);
     if(Date.now()-data.ts>30*24*60*60*1000){localStorage.removeItem('lcpfa_'+S.email);return}
     S.completed=data.completed||[];
+    if(data.currentMod&&data.currentMod>1)S.current=data.currentMod;
   }catch(e){}
 }
 
@@ -982,7 +986,17 @@ function revealNext(){
   if(!S.revealing||S.revealQueue.length===0){S.revealing=false;return}
   if(S.audioPaused)return;
 
-  var el=S.revealQueue.shift();
+  var el=S.revealQueue[0];
+
+  // If it's a knowledge check, reveal it and stop (user must interact)
+  if(el.classList.contains('knowledge-check')){
+    S.revealQueue.shift();
+    el.classList.add('revealed');
+    S.revealing=false;
+    return;
+  }
+
+  S.revealQueue.shift();
   el.classList.add('revealed');
 
   // Calculate delay based on word count (~360 words/min = 167ms per word)
@@ -998,8 +1012,10 @@ function revealNext(){
       utt.lang='en-GB';
       // Try to find a UK voice
       var voices=speechSynthesis.getVoices();
-      var ukVoice=voices.find(function(v){return v.lang==='en-GB'});
-      if(ukVoice)utt.voice=ukVoice;
+      var googleUK=voices.find(function(v){return v.name.indexOf('Google UK English Female')>-1});
+      var femaleUK=voices.find(function(v){return v.lang==='en-GB'&&/female/i.test(v.name)});
+      var anyUK=voices.find(function(v){return v.lang==='en-GB'});
+      utt.voice=googleUK||femaleUK||anyUK||null;
       utt.onend=function(){
         el.classList.remove('speaking');
         if(S.revealing&&!S.audioPaused)revealNext();
@@ -1070,6 +1086,11 @@ function checkKC(btn){
   });
   kc.querySelector('.kc-feedback.'+(ok?'correct':'incorrect')).classList.add('show');
   btn.disabled=true;
+  // Unlock gated continue button
+  var sib=kc.nextElementSibling;
+  while(sib){if(sib.classList.contains('kc-gated')){sib.classList.add('unlocked');break}sib=sib.nextElementSibling}
+  // Resume reveal for remaining content
+  if(S.revealQueue&&S.revealQueue.length>0){S.revealing=true;revealNext()}
 }
 document.addEventListener('click',function(e){
   var opt=e.target.closest('.kc-option');
@@ -1180,11 +1201,51 @@ function postToBackend(body,cb){
   }).then(function(r){return r.json()}).then(function(d){if(cb)cb(d)}).catch(function(e){console.error('Backend error:',e);if(cb)cb({success:false,error:e.message})});
 }
 
+
+
+function trySessionResume(){
+  try{
+    var keys=Object.keys(sessionStorage);
+    for(var i=0;i<keys.length;i++){
+      if(keys[i].indexOf('lcpfa_session_')===0){
+        var sess=JSON.parse(sessionStorage.getItem(keys[i]));
+        if(sess&&sess.email){
+          S.email=sess.email;S.name=sess.name;
+          S.failCount=sess.failCount||0;S.maxAttempts=sess.maxAttempts||3;
+          S.config=sess.config||{};S.certInfo=sess.certInfo||null;
+          loadProgress();
+          document.getElementById('loginOverlay').classList.add('hidden');
+          document.getElementById('appShell').style.display='flex';
+          document.getElementById('audioFab').style.display='flex';
+          document.getElementById('userName').textContent=S.name.split(' ')[0];
+          document.getElementById('userAvatar').textContent=S.name.charAt(0).toUpperCase();
+          buildSidebar();navigateTo(S.current||1);
+          return true;
+        }
+      }
+    }
+  }catch(e){}
+  return false;
+}
+function gateContentAfterKC(){
+  document.querySelectorAll('.knowledge-check').forEach(function(kc){
+    var sib=kc.nextElementSibling;
+    while(sib){
+      if(sib.classList.contains('btn-next')||sib.tagName==='BUTTON'){
+        if(!kc.dataset.gated){sib.classList.add('kc-gated');kc.dataset.gated='true'}
+        break;
+      }
+      sib=sib.nextElementSibling;
+    }
+  });
+}
 /* ═══ INIT ═════════════════════════════════════════════════ */
 document.getElementById('loginEmail').addEventListener('keydown',function(e){if(e.key==='Enter')handleLogin()});
 document.getElementById('loginName').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('loginEmail').focus()});
 // Preload voices
 if(window.speechSynthesis){speechSynthesis.onvoiceschanged=function(){speechSynthesis.getVoices()}}
+trySessionResume();
+gateContentAfterKC();
 </script>
 </body>
 </html>
