@@ -1592,12 +1592,14 @@ function onLoginSuccess(result) {
     return;
   }
 
-  STATE.email = result.email;
-  STATE.name = result.name || result.email.split('@')[0];
-  STATE.failCount = result.failCount || 0;
-  STATE.maxAttempts = result.maxAttempts || 3;
-  STATE.config = result.config || {};
-  STATE.certInfo = result.existingCert || null;
+  var tutor = result.tutor || {};
+  var config = result.config || {};
+  STATE.email = tutor.email || document.getElementById('loginEmail').value.trim().toLowerCase();
+  STATE.name = tutor.name || document.getElementById('loginName').value.trim();
+  STATE.failCount = config.failCount || 0;
+  STATE.maxAttempts = config.maxAttempts || 3;
+  STATE.config = config;
+  STATE.certInfo = result.certificate || null;
 
   // Set up UI
   document.getElementById('loginOverlay').classList.add('hidden');
@@ -1609,7 +1611,7 @@ function onLoginSuccess(result) {
   if (STATE.certInfo) {
     document.getElementById('certBanner').classList.add('show');
     document.getElementById('certBannerInfo').textContent =
-      STATE.certInfo.certNo + ' — Valid until ' + STATE.certInfo.expiry;
+      (STATE.certInfo.certNo || STATE.certInfo.certNumber) + ' — Valid until ' + STATE.certInfo.expiry;
   }
 
   buildSidebar();
@@ -1849,20 +1851,20 @@ function showCertificate() {
 
 function displayCert(cert) {
   document.getElementById('certName').textContent = STATE.name;
-  document.getElementById('certNo').textContent = cert.certNo || '—';
+  document.getElementById('certNo').textContent = cert.certNo || cert.certNumber || '—';
   document.getElementById('certDate').textContent = cert.date || cert.issued || '—';
   document.getElementById('certExpiry').textContent = cert.expiry || '—';
   document.getElementById('certScore').textContent = cert.score || '—';
 
-  if (cert.link) {
-    document.getElementById('certDownloadBtn').href = cert.link;
+  if (cert.link || cert.pdfUrl) {
+    document.getElementById('certDownloadBtn').href = cert.link || cert.pdfUrl;
     document.getElementById('certDownloadBtn').style.display = 'inline-flex';
   }
 }
 
 function requestEmailCert() {
   if (!STATE.certInfo) return;
-  postToBackend({ action: 'emailcertificate', email: STATE.email, course: COURSE_NAME, certNo: STATE.certInfo.certNo || '' }, function(d) {
+  postToBackend({ action: 'emailcertificate', email: STATE.email, course: COURSE_NAME, certNo: STATE.certInfo.certNo || STATE.certInfo.certNumber || '' }, function(d) {
     alert(d && d.success ? 'Certificate emailed to ' + STATE.email : 'Failed to email certificate.');
   });
 }
