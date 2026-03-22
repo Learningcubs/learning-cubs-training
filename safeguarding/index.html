@@ -1769,7 +1769,7 @@ function checkKC(btn) {
   kc.querySelector('.kc-feedback.' + (isCorrect ? 'correct' : 'incorrect')).classList.add('show');
   btn.disabled = true;
 
-  // Unlock the gated continue button
+  // Unlock the gated continue button and resume reveal
   var sibling = kc.nextElementSibling;
   while (sibling) {
     if (sibling.classList.contains('kc-gated')) {
@@ -1777,6 +1777,12 @@ function checkKC(btn) {
       break;
     }
     sibling = sibling.nextElementSibling;
+  }
+
+  // Resume word-by-word reveal for remaining content after the KC
+  if (REVEAL_IDX < REVEAL_ELS.length) {
+    STATE.revealing = true;
+    revealNext();
   }
 }
 
@@ -2001,13 +2007,15 @@ var REVEAL_IDX = 0;
 function setupReveal(modEl) {
   REVEAL_ELS = [];
   REVEAL_IDX = 0;
-  // Get all content paragraphs and list items (not in KC, header, or buttons)
-  var els = modEl.querySelectorAll('p, li, h3, h4, blockquote, .callout, .info-box, .warning-box');
+  // Get all content elements in DOM order, including knowledge checks
+  var els = modEl.querySelectorAll('p, li, h3, h4, blockquote, .callout, .info-box, .warning-box, .knowledge-check');
   els.forEach(function(el) {
-    // Skip elements inside knowledge-check, module-header, cert-wrapper, quiz
-    if (el.closest('.knowledge-check') || el.closest('.module-header') || el.closest('.cert-wrapper') || el.closest('.quiz-results')) return;
+    // Skip elements inside module-header, cert-wrapper, quiz, or nested inside a KC (the KC itself is included)
+    if (el.closest('.module-header') || el.closest('.cert-wrapper') || el.closest('.quiz-results')) return;
     if (el.classList.contains('subtitle') || el.classList.contains('desc')) return;
     if (el.tagName === 'BUTTON' || el.closest('button')) return;
+    // Skip child elements of knowledge-check (the KC div itself will be revealed as a whole)
+    if (el.closest('.knowledge-check') && !el.classList.contains('knowledge-check')) return;
     el.classList.add('reveal-el');
     el.classList.remove('revealed', 'speaking');
     REVEAL_ELS.push(el);
@@ -2028,6 +2036,12 @@ function revealNext() {
   var el = REVEAL_ELS[REVEAL_IDX];
   el.classList.add('revealed');
   REVEAL_IDX++;
+
+  // If it's a knowledge check, just reveal it and stop (user must interact)
+  if (el.classList.contains('knowledge-check')) {
+    STATE.revealing = false;
+    return;
+  }
 
   // Speak if audio enabled
   var text = el.innerText || el.textContent || '';
