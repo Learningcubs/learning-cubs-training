@@ -529,9 +529,57 @@ img { max-width: 100%; height: auto; }
 .cert-banner .cb-icon { font-size: 2rem; }
 .cert-banner .cb-text h4 { font-size: .95rem; color: #166534; }
 .cert-banner .cb-text p { font-size: .82rem; color: #166534; opacity: .7; }
+
+/* ─── WORD REVEAL ──────────────────────────────────────────── */
+.reveal-el { opacity: 0; transform: translateY(4px); transition: opacity .4s ease, transform .4s ease; }
+.reveal-el.revealed { opacity: 1; transform: translateY(0); }
+.reveal-el.speaking { background: rgba(255,100,45,.06); border-radius: 4px; }
+
+/* ─── AUDIO FAB ────────────────────────────────────────────── */
+.audio-fab {
+  position: fixed; bottom: 24px; right: 24px; z-index: 999;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.audio-btn {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--navy); color: var(--white); border: none;
+  font-size: 1.3rem; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,24,72,.2);
+  transition: all .2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.audio-btn:hover { background: var(--orange); transform: scale(1.05); }
+.audio-btn.active { background: var(--orange); }
+.audio-panel {
+  background: var(--white); border-radius: var(--radius); padding: 16px;
+  box-shadow: 0 8px 32px rgba(0,24,72,.15); width: 220px; display: none;
+}
+.audio-panel.show { display: block; }
+.audio-panel label { font-size: .78rem; font-weight: 600; font-family: var(--font-display); display: block; margin-bottom: 6px; color: var(--navy); }
+.audio-panel input[type=range] { width: 100%; margin: 4px 0 10px; }
+.audio-panel .speed-val { font-size: .75rem; color: rgba(0,24,72,.5); text-align: right; margin-top: -6px; margin-bottom: 8px; }
+.audio-panel button { width: 100%; padding: 8px; border: none; border-radius: 6px; font-family: var(--font-display); font-weight: 600; cursor: pointer; font-size: .82rem; }
+.audio-panel .pause-btn { background: var(--cream-2); color: var(--navy); margin-bottom: 6px; }
+
+/* ─── KC CONTENT GATE ──────────────────────────────────────── */
+.kc-gated { display: none; }
+.kc-gated.unlocked { display: block; }
+
 </style>
 </head>
 <body>
+
+
+<!-- ─── AUDIO FAB ──────────────────────────────────────────── -->
+<div class="audio-fab" id="audioFab" style="display:none">
+  <div class="audio-panel" id="audioPanel">
+    <label>Speed</label>
+    <input type="range" id="audioSpeed" min="0.5" max="2" step="0.1" value="1">
+    <div class="speed-val" id="speedVal">1.0x</div>
+    <button class="pause-btn" id="pauseBtn" onclick="togglePause()">Pause</button>
+  </div>
+  <button class="audio-btn" id="audioBtn" onclick="toggleAudio()" title="Toggle narration">&#x1F50A;</button>
+</div>
 
 <!-- ─── LOGIN OVERLAY ──────────────────────────────────────── -->
 <div class="login-overlay" id="loginOverlay">
@@ -1529,7 +1577,11 @@ var STATE = {
   failCount: 0,
   maxAttempts: 3,
   certInfo: null,
-  config: {}
+  config: {},
+  audioEnabled: false,
+  audioPaused: false,
+  revealing: false,
+  revealTimer: null
 };
 
 var MODULES = [
@@ -1604,6 +1656,8 @@ function onLoginSuccess(result) {
   // Set up UI
   document.getElementById('loginOverlay').classList.add('hidden');
   document.getElementById('appShell').style.display = 'flex';
+  document.getElementById('audioFab').style.display = 'flex';
+  loadProgress();
   document.getElementById('userName').textContent = STATE.name.split(' ')[0];
   document.getElementById('userAvatar').textContent = STATE.name.charAt(0).toUpperCase();
 
@@ -1663,6 +1717,10 @@ function getMaxAccessible() {
 
 function navigateTo(modId) {
   STATE.currentMod = modId;
+  STATE.revealing = false;
+  if (STATE.revealTimer) { clearTimeout(STATE.revealTimer); STATE.revealTimer = null; }
+  if (window.speechSynthesis) speechSynthesis.cancel();
+
   document.querySelectorAll('.module').forEach(function(el) { el.classList.remove('active'); });
   var target = document.getElementById('mod' + modId);
   if (target) target.classList.add('active');
@@ -1673,10 +1731,17 @@ function navigateTo(modId) {
   if (modId === 11) buildQuiz();
   // If certificate module, show cert
   if (modId === 12) showCertificate();
+
+  // Start word-by-word reveal for content modules
+  if (modId <= 10) {
+    setupReveal(target);
+    startReveal();
+  }
 }
 
 function completeAndNext(modId) {
   if (STATE.completed.indexOf(modId) === -1) STATE.completed.push(modId);
+  saveProgress();
   navigateTo(modId + 1);
 }
 
@@ -1703,6 +1768,16 @@ function checkKC(btn) {
 
   kc.querySelector('.kc-feedback.' + (isCorrect ? 'correct' : 'incorrect')).classList.add('show');
   btn.disabled = true;
+
+  // Unlock the gated continue button
+  var sibling = kc.nextElementSibling;
+  while (sibling) {
+    if (sibling.classList.contains('kc-gated')) {
+      sibling.classList.add('unlocked');
+      break;
+    }
+    sibling = sibling.nextElementSibling;
+  }
 }
 
 // Click handler for KC options
@@ -1869,6 +1944,173 @@ function requestEmailCert() {
   });
 }
 
+
+/* ─── PROGRESS PERSISTENCE ─────────────────────────────────── */
+function saveProgress() {
+  if (!STATE.email) return;
+  var data = { completed: STATE.completed, currentMod: STATE.currentMod, ts: Date.now() };
+  try { sessionStorage.setItem('lcsf_session_' + STATE.email, JSON.stringify({ email: STATE.email, name: STATE.name, failCount: STATE.failCount, maxAttempts: STATE.maxAttempts, config: STATE.config, certInfo: STATE.certInfo })); } catch(e) {}
+  try { localStorage.setItem('lcsf_' + STATE.email, JSON.stringify(data)); } catch(e) {}
+}
+
+function loadProgress() {
+  if (!STATE.email) return;
+  try {
+    var raw = localStorage.getItem('lcsf_' + STATE.email);
+    if (!raw) return;
+    var data = JSON.parse(raw);
+    if (Date.now() - data.ts > 30 * 24 * 60 * 60 * 1000) { localStorage.removeItem('lcsf_' + STATE.email); return; }
+    STATE.completed = data.completed || [];
+    if (data.currentMod && data.currentMod > 1) STATE.currentMod = data.currentMod;
+  } catch(e) {}
+}
+
+function trySessionResume() {
+  try {
+    var keys = Object.keys(sessionStorage);
+    for (var i = 0; i < keys.length; i++) {
+      if (keys[i].indexOf('lcsf_session_') === 0) {
+        var sess = JSON.parse(sessionStorage.getItem(keys[i]));
+        if (sess && sess.email) {
+          STATE.email = sess.email;
+          STATE.name = sess.name;
+          STATE.failCount = sess.failCount || 0;
+          STATE.maxAttempts = sess.maxAttempts || 3;
+          STATE.config = sess.config || {};
+          STATE.certInfo = sess.certInfo || null;
+          loadProgress();
+          document.getElementById('loginOverlay').classList.add('hidden');
+          document.getElementById('appShell').style.display = 'flex';
+          document.getElementById('audioFab').style.display = 'flex';
+          document.getElementById('userName').textContent = STATE.name.split(' ')[0];
+          document.getElementById('userAvatar').textContent = STATE.name.charAt(0).toUpperCase();
+          buildSidebar();
+          navigateTo(STATE.currentMod || 1);
+          return true;
+        }
+      }
+    }
+  } catch(e) {}
+  return false;
+}
+
+/* ─── WORD-BY-WORD REVEAL ──────────────────────────────────── */
+var REVEAL_ELS = [];
+var REVEAL_IDX = 0;
+
+function setupReveal(modEl) {
+  REVEAL_ELS = [];
+  REVEAL_IDX = 0;
+  // Get all content paragraphs and list items (not in KC, header, or buttons)
+  var els = modEl.querySelectorAll('p, li, h3, h4, blockquote, .callout, .info-box, .warning-box');
+  els.forEach(function(el) {
+    // Skip elements inside knowledge-check, module-header, cert-wrapper, quiz
+    if (el.closest('.knowledge-check') || el.closest('.module-header') || el.closest('.cert-wrapper') || el.closest('.quiz-results')) return;
+    if (el.classList.contains('subtitle') || el.classList.contains('desc')) return;
+    if (el.tagName === 'BUTTON' || el.closest('button')) return;
+    el.classList.add('reveal-el');
+    el.classList.remove('revealed', 'speaking');
+    REVEAL_ELS.push(el);
+  });
+}
+
+function startReveal() {
+  STATE.revealing = true;
+  REVEAL_IDX = 0;
+  revealNext();
+}
+
+function revealNext() {
+  if (!STATE.revealing || REVEAL_IDX >= REVEAL_ELS.length) {
+    STATE.revealing = false;
+    return;
+  }
+  var el = REVEAL_ELS[REVEAL_IDX];
+  el.classList.add('revealed');
+  REVEAL_IDX++;
+
+  // Speak if audio enabled
+  var text = el.innerText || el.textContent || '';
+  if (STATE.audioEnabled && window.speechSynthesis && text.trim()) {
+    el.classList.add('speaking');
+    var utt = new SpeechSynthesisUtterance(text);
+    utt.rate = parseFloat(document.getElementById('audioSpeed').value) || 1;
+    utt.lang = 'en-GB';
+    // Prefer female UK voice
+    var voices = speechSynthesis.getVoices();
+    var femaleUK = voices.find(function(v) { return v.lang === 'en-GB' && /female/i.test(v.name); });
+    var anyUK = voices.find(function(v) { return v.lang === 'en-GB'; });
+    var googleUK = voices.find(function(v) { return v.name.indexOf('Google UK English Female') > -1; });
+    utt.voice = googleUK || femaleUK || anyUK || null;
+    utt.onend = function() {
+      el.classList.remove('speaking');
+      if (STATE.revealing && !STATE.audioPaused) revealNext();
+    };
+    speechSynthesis.speak(utt);
+  } else {
+    // No audio - use timer-based reveal (~360 wpm)
+    var words = text.split(/\s+/).length;
+    var delay = Math.max(300, (words / 6) * 1000);
+    STATE.revealTimer = setTimeout(function() {
+      if (STATE.revealing) revealNext();
+    }, delay);
+  }
+}
+
+/* ─── AUDIO CONTROLS ───────────────────────────────────────── */
+function toggleAudio() {
+  var btn = document.getElementById('audioBtn');
+  var panel = document.getElementById('audioPanel');
+  if (!STATE.audioEnabled) {
+    STATE.audioEnabled = true;
+    btn.classList.add('active');
+    panel.classList.add('show');
+    if (window.speechSynthesis) speechSynthesis.getVoices();
+  } else {
+    STATE.audioEnabled = false;
+    STATE.audioPaused = false;
+    btn.classList.remove('active');
+    panel.classList.remove('show');
+    if (window.speechSynthesis) speechSynthesis.cancel();
+  }
+}
+
+function togglePause() {
+  if (!STATE.audioEnabled) return;
+  var btn = document.getElementById('pauseBtn');
+  if (STATE.audioPaused) {
+    STATE.audioPaused = false;
+    btn.textContent = 'Pause';
+    if (window.speechSynthesis) speechSynthesis.resume();
+    if (STATE.revealing) revealNext();
+  } else {
+    STATE.audioPaused = true;
+    btn.textContent = 'Resume';
+    if (window.speechSynthesis) speechSynthesis.pause();
+  }
+}
+
+/* ─── KC CONTENT GATING ────────────────────────────────────── */
+function gateContentAfterKC() {
+  // For each knowledge check, hide the Continue button until answered
+  document.querySelectorAll('.knowledge-check').forEach(function(kc) {
+    var nextBtn = null;
+    var sibling = kc.nextElementSibling;
+    while (sibling) {
+      if (sibling.classList.contains('btn-next') || sibling.tagName === 'BUTTON') {
+        nextBtn = sibling;
+        break;
+      }
+      sibling = sibling.nextElementSibling;
+    }
+    if (nextBtn && !kc.dataset.gated) {
+      nextBtn.classList.add('kc-gated');
+      kc.dataset.gated = 'true';
+      kc.dataset.nextBtn = 'true';
+    }
+  });
+}
+
 /* ─── BACKEND COMMUNICATION ──────────────────────────────── */
 function postToBackend(body, cb) {
   fetch(APPS_SCRIPT_URL, {
@@ -1887,6 +2129,20 @@ document.getElementById('loginEmail').addEventListener('keydown', function(e) {
 document.getElementById('loginName').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') document.getElementById('loginEmail').focus();
 });
+
+// Speed slider
+document.getElementById('audioSpeed').addEventListener('input', function() {
+  document.getElementById('speedVal').textContent = parseFloat(this.value).toFixed(1) + 'x';
+});
+
+// Preload voices
+if (window.speechSynthesis) { speechSynthesis.onvoiceschanged = function() { speechSynthesis.getVoices(); }; }
+
+// Try to resume session on page refresh
+trySessionResume();
+
+// Gate content after knowledge checks
+gateContentAfterKC();
 </script>
 
 </body>
