@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Cubs — Paediatric First Aid Awareness Level 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#001848;--orange:#FF642D;--cream-1:#F6F6F4;--cream-2:#EFEEEA;--cream-3:#DBD9D2;--purple:#7D49C8;--blue:#53A6E2;--teal:#00A0A7;--yellow:#FCCF41;--pink:#B93B6F;--white:#FFFFFF;--font-d:'Quicksand',sans-serif;--font-b:'Nunito',sans-serif;--r:12px;--sh:0 4px 24px rgba(0,24,72,.08)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--font-b);background:var(--cream-1);color:var(--navy);line-height:1.7;min-height:100vh}
+h1,h2,h3,h4{font-family:var(--font-d);font-weight:700;line-height:1.3}
+a{color:var(--orange);text-decoration:none}a:hover{text-decoration:underline}
+img{max-width:100%;height:auto}
+
+/* ─── LAYOUT ───────────────────────────────────────────── */
+.app{display:flex;min-height:100vh}
+.sidebar{width:300px;min-width:300px;background:var(--navy);color:var(--white);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .3s}
+.sidebar-header{padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sidebar-header h1{font-size:1.3rem;font-weight:800;color:var(--orange)}
+.sidebar-header p{font-size:.75rem;opacity:.7;margin-top:4px;font-family:var(--font-d)}
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px 0}
+.sidebar-nav::-webkit-scrollbar{width:4px}
+.sidebar-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:4px}
+
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 24px;cursor:pointer;font-size:.84rem;font-family:var(--font-d);font-weight:600;transition:all .2s;border-left:3px solid transparent;color:rgba(255,255,255,.55)}
+.nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.9)}
+.nav-item.active{background:rgba(255,100,45,.12);border-left-color:var(--orange);color:var(--white)}
+.nav-item.completed{color:rgba(255,255,255,.85)}
+.nav-item.completed::after{content:'✓';margin-left:auto;color:#4ade80;font-weight:700;font-size:.95rem}
+.nav-item.locked{opacity:.3;cursor:not-allowed}
+.nav-item.locked::after{content:'🔒';margin-left:auto;font-size:.7rem}
+.nav-item .nav-num{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0}
+.nav-item.active .nav-num{background:var(--orange);color:var(--white)}
+.nav-item.completed .nav-num{background:#4ade80;color:var(--navy)}
+
+.sidebar-footer{padding:16px 24px;border-top:1px solid rgba(255,255,255,.1);font-size:.72rem;opacity:.5}
+
+.main{flex:1;margin-left:300px;min-height:100vh}
+.topbar{position:sticky;top:0;z-index:50;background:var(--white);border-bottom:1px solid var(--cream-3);padding:14px 40px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,24,72,.04)}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.menu-toggle{display:none;background:none;border:none;cursor:pointer;font-size:1.5rem;color:var(--navy);padding:4px}
+.progress-wrap{flex:1;max-width:300px;height:8px;background:var(--cream-2);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:4px;transition:width .4s;width:0%}
+.topbar-right{display:flex;align-items:center;gap:12px;font-size:.85rem}
+.user-badge{display:flex;align-items:center;gap:8px;background:var(--cream-1);padding:6px 14px;border-radius:20px;font-weight:600;font-size:.82rem}
+.user-badge .avatar{width:28px;height:28px;border-radius:50%;background:var(--teal);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700}
+
+.content{padding:40px;max-width:860px;margin:0 auto}
+.module{display:none;animation:fadeUp .4s ease}
+.module.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── WORD-BY-WORD REVEAL ──────────────────────────────── */
+.reveal-el{opacity:0;transform:translateY(6px);transition:opacity .35s ease,transform .35s ease}
+.reveal-el.revealed{opacity:1;transform:translateY(0)}
+.reveal-el.speaking{background:rgba(0,160,167,.08);border-radius:4px}
+
+.module-header{margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid var(--cream-3)}
+.module-header .module-tag{font-family:var(--font-d);font-size:.78rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.module-header h2{font-size:1.8rem;color:var(--navy)}
+.module-header p.subtitle{font-size:.95rem;color:rgba(0,24,72,.55);margin-top:6px}
+
+.content-section{margin-bottom:32px}
+.content-section h3{font-size:1.2rem;color:var(--navy);margin-bottom:12px;padding-left:14px;border-left:3px solid var(--teal)}
+.content-section h4{font-size:1.05rem;color:var(--navy);margin:20px 0 8px}
+.content-section p{margin-bottom:14px;font-size:.95rem}
+.content-section ul,.content-section ol{margin:0 0 14px 24px;font-size:.95rem}
+.content-section li{margin-bottom:6px}
+
+.info-box{border-radius:var(--r);padding:20px 24px;margin:20px 0;font-size:.92rem}
+.info-box.key-point{background:linear-gradient(135deg,rgba(0,160,167,.08),rgba(83,166,226,.06));border-left:4px solid var(--teal)}
+.info-box.warning{background:rgba(255,100,45,.06);border-left:4px solid var(--orange)}
+.info-box.procedure{background:rgba(125,73,200,.06);border-left:4px solid var(--purple)}
+.info-box.important{background:rgba(185,59,111,.06);border-left:4px solid var(--pink)}
+.info-box.tip{background:rgba(252,207,65,.08);border-left:4px solid var(--yellow)}
+.info-box strong{display:block;margin-bottom:6px;font-size:.95rem}
+
+/* Steps */
+.step-list{counter-reset:step;list-style:none;margin:20px 0;padding:0}
+.step-list li{counter-increment:step;padding:14px 14px 14px 56px;margin-bottom:10px;background:var(--white);border-radius:8px;position:relative;font-size:.92rem;box-shadow:0 2px 8px rgba(0,24,72,.04)}
+.step-list li::before{content:counter(step);position:absolute;left:14px;top:14px;width:30px;height:30px;border-radius:50%;background:var(--teal);color:var(--white);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;font-family:var(--font-d)}
+
+/* Knowledge Check */
+.knowledge-check{background:var(--white);border-radius:var(--r);padding:28px;margin:28px 0;box-shadow:var(--sh);border:1px solid var(--cream-3)}
+.kc-header{font-family:var(--font-d);font-weight:700;font-size:.82rem;color:var(--purple);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px}
+.kc-question{font-weight:700;font-size:1.02rem;margin-bottom:16px}
+.kc-options{display:flex;flex-direction:column;gap:8px}
+.kc-option{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;border:2px solid var(--cream-3);cursor:pointer;transition:all .2s;font-size:.92rem}
+.kc-option:hover{border-color:var(--blue);background:rgba(83,166,226,.04)}
+.kc-option.selected{border-color:var(--blue);background:rgba(83,166,226,.08)}
+.kc-option.correct{border-color:#4ade80;background:rgba(74,222,128,.08)}
+.kc-option.incorrect{border-color:#f87171;background:rgba(248,113,113,.06)}
+.kc-option .radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--cream-3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.kc-option.selected .radio{border-color:var(--blue)}
+.kc-option.selected .radio::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--blue)}
+.kc-option.correct .radio{border-color:#4ade80}
+.kc-option.correct .radio::after{content:'';width:10px;height:10px;border-radius:50%;background:#4ade80}
+.kc-feedback{margin-top:14px;padding:14px 18px;border-radius:8px;font-size:.9rem;display:none}
+.kc-feedback.show{display:block}
+.kc-feedback.correct{background:rgba(74,222,128,.1);color:#166534}
+.kc-feedback.incorrect{background:rgba(248,113,113,.1);color:#991b1b}
+.kc-submit{margin-top:14px;background:var(--navy);color:var(--white);border:none;padding:10px 24px;border-radius:8px;font-family:var(--font-d);font-weight:600;font-size:.9rem;cursor:pointer;transition:all .2s}
+.kc-submit:hover{background:var(--teal)}
+.kc-submit:disabled{opacity:.4;cursor:not-allowed}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:8px;font-family:var(--font-d);font-weight:700;font-size:.92rem;border:none;cursor:pointer;transition:all .25s;text-decoration:none}
+.btn-primary{background:var(--teal);color:var(--white)}
+.btn-primary:hover{background:#008a90;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,160,167,.3)}
+.btn-secondary{background:var(--navy);color:var(--white)}
+.btn-secondary:hover{background:#0a2a5e}
+.btn-outline{background:transparent;border:2px solid var(--navy);color:var(--navy)}
+.btn-outline:hover{background:var(--navy);color:var(--white)}
+.btn-next{margin-top:32px;background:var(--teal);color:var(--white);padding:14px 36px;font-size:1rem}
+
+/* Quiz */
+.quiz-question{background:var(--white);border-radius:var(--r);padding:28px;margin-bottom:24px;box-shadow:var(--sh);border:1px solid var(--cream-3)}
+.quiz-question .q-num{font-family:var(--font-d);font-size:.78rem;font-weight:700;color:var(--teal);margin-bottom:10px}
+.quiz-question .q-text{font-weight:700;font-size:1.02rem;margin-bottom:16px}
+.quiz-results{background:var(--white);border-radius:var(--r);padding:40px;text-align:center;box-shadow:0 12px 40px rgba(0,24,72,.12)}
+.quiz-results.pass{border-top:4px solid #4ade80}
+.quiz-results.fail{border-top:4px solid #f87171}
+.quiz-results h3{font-size:1.5rem;margin-bottom:12px}
+.quiz-results .score-display{font-size:3rem;font-weight:800;font-family:var(--font-d);margin:16px 0}
+.quiz-results.pass .score-display{color:#16a34a}
+.quiz-results.fail .score-display{color:#dc2626}
+
+/* Certificate */
+.cert-wrapper{background:var(--white);border-radius:var(--r);padding:40px 32px;box-shadow:0 4px 16px rgba(0,24,72,.08);text-align:center;border:1px solid var(--cream-3)}
+.cert-logo{font-size:1.4rem;font-weight:800;color:var(--teal);margin-bottom:4px;font-family:var(--font-d)}
+.cert-title{font-size:1.1rem;color:var(--navy);margin-bottom:20px;font-weight:600}
+.cert-name{font-size:1.6rem;color:var(--navy);font-weight:800;margin:12px 0;font-family:var(--font-d)}
+.cert-course{font-size:1rem;color:var(--teal);font-weight:700;margin-bottom:20px}
+.cert-details{display:flex;justify-content:center;gap:32px;margin:20px 0;font-size:.88rem;flex-wrap:wrap}
+.cert-detail{text-align:center}
+.cert-detail label{display:block;font-size:.75rem;color:rgba(0,24,72,.5);text-transform:uppercase;letter-spacing:.04em}
+.cert-detail span{font-weight:700}
+.cert-actions{margin-top:20px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+
+/* Audio Overlay */
+.audio-fab{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.audio-btn{width:56px;height:56px;border-radius:50%;background:var(--navy);color:var(--white);border:none;font-size:1.3rem;cursor:pointer;box-shadow:0 4px 16px rgba(0,24,72,.2);transition:all .2s;display:flex;align-items:center;justify-content:center}
+.audio-btn:hover{background:var(--teal);transform:scale(1.05)}
+.audio-btn.active{background:var(--teal)}
+.audio-panel{background:var(--white);border-radius:var(--r);padding:16px;box-shadow:0 8px 32px rgba(0,24,72,.15);width:220px;display:none}
+.audio-panel.show{display:block}
+.audio-panel label{font-size:.78rem;font-weight:600;font-family:var(--font-d);display:block;margin-bottom:6px;color:var(--navy)}
+.audio-panel input[type=range]{width:100%;margin:4px 0 10px}
+.audio-panel .speed-val{font-size:.75rem;color:rgba(0,24,72,.5);text-align:right;margin-top:-6px;margin-bottom:8px}
+.audio-panel button{width:100%;padding:8px;border:none;border-radius:6px;font-family:var(--font-d);font-weight:600;cursor:pointer;font-size:.82rem}
+.audio-panel .pause-btn{background:var(--cream-2);color:var(--navy);margin-bottom:6px}
+.audio-panel .pause-btn:hover{background:var(--cream-3)}
+.audio-panel .stop-btn{background:rgba(248,113,113,.1);color:#dc2626}
+
+/* Login Gate */
+.login-overlay{position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;align-items:center;justify-content:center;padding:24px}
+.login-overlay.hidden{display:none}
+.login-card{background:var(--white);border-radius:16px;padding:48px 40px;max-width:440px;width:100%;box-shadow:0 12px 40px rgba(0,24,72,.2);text-align:center;animation:fadeUp .5s}
+.login-card .logo{font-family:var(--font-d);font-size:1.6rem;font-weight:800;color:var(--teal);margin-bottom:4px}
+.login-card .logo-sub{font-size:.85rem;color:rgba(0,24,72,.5);margin-bottom:28px}
+.login-card h2{font-size:1.3rem;margin-bottom:8px}
+.login-card p.desc{font-size:.88rem;color:rgba(0,24,72,.55);margin-bottom:24px}
+.form-group{text-align:left;margin-bottom:16px}
+.form-group label{display:block;font-size:.82rem;font-weight:700;margin-bottom:6px;color:var(--navy);font-family:var(--font-d)}
+.form-group input{width:100%;padding:12px 16px;border:2px solid var(--cream-3);border-radius:8px;font-size:.95rem;font-family:var(--font-b);transition:border-color .2s;outline:none}
+.form-group input:focus{border-color:var(--blue)}
+.login-error{color:#dc2626;font-size:.85rem;margin-bottom:12px;min-height:20px}
+.login-btn{width:100%;padding:14px;background:var(--teal);color:var(--white);border:none;border-radius:8px;font-family:var(--font-d);font-weight:700;font-size:1rem;cursor:pointer;transition:all .2s}
+.login-btn:hover{background:#008a90}
+.login-btn:disabled{opacity:.5;cursor:wait}
+
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .menu-toggle{display:block!important}
+  .content{padding:24px 20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ VERIFICATION GATE ══════════════════════════════════ -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="logo">Learning Cubs</div>
+    <div class="logo-sub">Training Portal</div>
+    <h2>Paediatric First Aid Awareness</h2>
+    <p class="desc">Level 2 &middot; RCUK 2025 Aligned</p>
+    <div class="form-group">
+      <label for="loginName">Full Name</label>
+      <input type="text" id="loginName" placeholder="Your full name" autocomplete="name">
+    </div>
+    <div class="form-group">
+      <label for="loginEmail">Email Address</label>
+      <input type="email" id="loginEmail" placeholder="name@learningcubs.co.uk" autocomplete="email">
+    </div>
+    <div class="login-error" id="loginError"></div>
+    <button class="login-btn" id="loginBtn" onclick="handleLogin()">Start Training</button>
+  </div>
+</div>
+
+<!-- ═══ APP SHELL ══════════════════════════════════════════ -->
+<div class="app" id="appShell" style="display:none">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h1>Learning Cubs</h1>
+      <p>Paediatric First Aid Level 2 &middot; RCUK 2025</p>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav"></nav>
+    <div class="sidebar-footer">&copy; 2025 Learning Cubs</div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()" style="display:none">&#9776;</button>
+        <div>
+          <div style="font-family:var(--font-d);font-weight:700;font-size:.9rem" id="topbarTitle">Module 1</div>
+          <div class="progress-wrap"><div class="progress-fill" id="progressBar"></div></div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="user-badge"><div class="avatar" id="userAvatar">?</div><span id="userName">Tutor</span></div>
+      </div>
+    </div>
+
+    <div class="content" id="contentArea">
+
+      <!-- ═══ MODULE 1: INTRODUCTION ══════════════════════ -->
+      <div class="module" id="mod1">
+        <div class="module-header">
+          <div class="module-tag">Module 1 of 11</div>
+          <h2>Introduction to Paediatric First Aid</h2>
+          <p class="subtitle">Why first aid knowledge is essential for anyone working with children</p>
+        </div>
+        <div class="content-section">
+          <h3>Why Paediatric First Aid Matters</h3>
+          <p class="reveal-el">Children are naturally curious and active, which means accidents and medical emergencies are common. As a tutor who works closely with children, you may be the first adult on the scene when an emergency occurs.</p>
+          <p class="reveal-el">This course will give you the awareness and confidence to recognise common paediatric emergencies and provide appropriate first aid while waiting for professional medical help.</p>
+          <div class="info-box key-point reveal-el">
+            <strong>🔑 Key Point</strong>
+            This is an <em>awareness</em> course. It does not replace practical, hands-on first aid training. You are strongly encouraged to attend a face-to-face Paediatric First Aid course for full certification.
+          </div>
+        </div>
+        <div class="content-section">
+          <h3>Course Objectives</h3>
+          <p class="reveal-el">By the end of this course, you will be able to:</p>
+          <ul>
+            <li class="reveal-el">Assess an emergency situation safely</li>
+            <li class="reveal-el">Perform CPR on infants and children (awareness level)</li>
+            <li class="reveal-el">Manage choking in infants and children</li>
+            <li class="reveal-el">Recognise and respond to common childhood medical emergencies</li>
+            <li class="reveal-el">Treat minor injuries including bleeding, burns, and fractures</li>
+            <li class="reveal-el">Understand when and how to call emergency services</li>
+          </ul>
+        </div>
+        <div class="content-section">
+          <h3>Definitions</h3>
+          <div class="info-box procedure reveal-el">
+            <strong>📖 Age Definitions in Paediatric First Aid</strong>
+            <strong>Infant:</strong> Under 1 year old<br>
+            <strong>Child:</strong> 1 year to puberty (approximately 12 years)<br>
+            These definitions affect the techniques used for CPR and choking management.
+          </div>
+          <p class="reveal-el">The Resuscitation Council UK (RCUK) publishes updated guidelines that form the basis of UK first aid training. The 2025 guidelines are reflected throughout this course.</p>
+        </div>
+        <div class="knowledge-check reveal-el" data-answer="1">
+          <div class="kc-header">💡 Knowledge Check</div>
+          <div class="kc-question">In paediatric first aid, at what age is a person classified as an 'infant'?</div>
+          <div class="kc-options">
+            <div class="kc-option" data-idx="0"><div class="radio"></div>Under 6 months</div>
+            <div class="kc-option" data-idx="1"><div class="radio"></div>Under 1 year old</div>
+            <div class="kc-option" data-idx="2"><div class="radio"></div>Under 2 years old</div>
+            <div class="kc-option" data-idx="3"><div class="radio"></div>Under 5 years old</div>
+          </div>
+          <div class="kc-feedback correct">✅ Correct! An infant is classified as under 1 year old. Different CPR techniques apply to infants vs children.</div>
+          <div class="kc-feedback incorrect">❌ An infant is under 1 year old in paediatric first aid definitions.</div>
+          <button class="kc-submit" onclick="checkKC(this)">Check Answer</button>
+        </div>
+        <button class="btn btn-next" onclick="completeAndNext(1)">Continue to Module 2 →</button>
+      </div>
+
+      <!-- ═══ MODULE 2: ASSESSING AN EMERGENCY (DRABC) ════ -->
+      <div class="module" id="mod2">
+        <div class="module-header">
+          <div class="module-tag">Module 2 of 11</div>
+          <h2>Assessing an Emergency — DRABC</h2>
+          <p class="subtitle">The systematic approach to any emergency situation</p>
+        </div>
+        <div class="content-section">
+          <h3>The DRABC Framework</h3>
+          <p class="reveal-el">When you encounter any emergency, use the <strong>DRABC</strong> framework to assess the situation systematically:</p>
+          <ol class="step-list">
+            <li class="reveal-el"><strong>D — Danger</strong><br>Check for danger to yourself, bystanders, and the casualty. Never put yourself at risk. Remove the danger if safe, or move the casualty away from danger.</li>
+            <li class="reveal-el"><strong>R — Response</strong><br>Check if the casualty is responsive. For a child: speak loudly and clearly, gently tap their shoulders. For an infant: flick the sole of their foot. <strong>Never shake an infant.</strong></li>
+            <li class="reveal-el"><strong>A — Airway</strong><br>Open the airway using the head-tilt, chin-lift method. For an infant, use a neutral position (do not over-extend the neck). For a child, tilt the head slightly back.</li>
+            <li class="reveal-el"><strong>B — Breathing</strong><br>Look, listen, and feel for normal breathing for up to 10 seconds. Look for chest movement, listen for breath sounds, and feel for breath on your cheek.</li>
+            <li class="reveal-el"><strong>C — Circulation / CPR</strong><br>If the casualty is not breathing normally, begin CPR immediately and call 999/112.</li>
+          </ol>
+        </div>
+        <div class="content-section">
+          <h3>Calling Emergency Services</h3>
+          <p class="reveal-el">When calling 999 or 112, be prepared to give:</p>
+          <ul>
+            <li class="reveal-el">Your name and location (as precise as possible)</li>
+            <li class="reveal-el">The number you are calling from</li>
+            <li class="reveal-el">What has happened</li>
+            <li class="reveal-el">The age of the casualty</li>
+            <li class="reveal-el">The condition of the casualty (conscious? breathing?)</li>
+            <li class="reveal-el">Any treatment you are giving</li>
+          </ul>
+          <div class="info-box warning reveal-el">
+            <strong>⚠️ Important</strong>
+            If you are alone with an unresponsive child or infant, perform CPR for <strong>1 minute before calling 999</strong>. This is different from adult first aid where you call 999 first. Children's cardiac arrests are usually caused by breathing problems, so early rescue breaths are critical.
+          </div>
+        </div>
+        <div class="knowledge-check reveal-el" data-answer="2">
+          <div class="kc-header">💡 Knowledge Check</div>
+          <div class="kc-question">What does the 'R' in DRABC stand for?</div>
+          <div class="kc-options">
+            <div class="kc-option" data-idx="0"><div class="radio"></div>Recovery</div>
+            <div class="kc-option" data-idx="1"><div class="radio"></div>Resuscitation</div>
+            <div class="kc-option" data-idx="2"><div class="radio"></div>Response</div>
+            <div class="kc-option" data-idx="3"><div class="radio"></div>Respiration</div>
+          </div>
+          <div class="kc-feedback correct">✅ Correct! R stands for Response — check if the casualty is responsive.</div>
+          <div class="kc-feedback incorrect">❌ R stands for Response — checking whether the casualty responds to you.</div>
+          <button class="kc-submit" onclick="checkKC(this)">Check Answer</button>
+        </div>
+        <button class="btn btn-next" onclick="completeAndNext(2)">Continue to Module 3 →</button>
+      </div>
+
+      <!-- ═══ MODULE 3: PAEDIATRIC CPR ════════════════════ -->
+      <div class="module" id="mod3">
+        <div class="module-header">
+          <div class="module-tag">Module 3 of 11</div>
+          <h2>Paediatric CPR</h2>
+          <p class="subtitle">RCUK 2025 guidelines for infant and child resuscitation</p>
+        </div>
+        <div class="content-section">
+          <h3>CPR for Children (Age 1 to Puberty)</h3>
+          <div class="info-box procedure reveal-el">
+            <strong>🫀 Child CPR Procedure (RCUK 2025)</strong>
+            1. Open the airway (head-tilt, chin-lift)<br>
+            2. Give <strong>5 initial rescue breaths</strong> — pinch the nose, seal your mouth over theirs, blow steadily for 1 second watching for chest rise<br>
+            3. Give <strong>30 chest compressions</strong> — use the heel of one hand on the lower half of the breastbone, compress to one-third of the chest depth<br>
+            4. Continue at a ratio of <strong>30 compressions : 2 rescue breaths</strong><br>
+            5. Compress at a rate of <strong>100–120 per minute</strong><br>
+            6. If alone, perform CPR for 1 minute then call 999
+          </div>
+        </div>
+        <div class="content-section">
+          <h3>CPR for Infants (Under 1 Year)</h3>
+          <div class="info-box procedure reveal-el">
+            <strong>🫀 Infant CPR Procedure (RCUK 2025)</strong>
+            1. Open the airway in a <strong>neutral position</strong> (do NOT over-extend)<br>
+            2. Give <strong>5 initial rescue breaths</strong> — seal your mouth over the infant's mouth AND nose, blow gently for 1 second<br>
+            3. Give <strong>30 chest compressions</strong> — use <strong>two fingers</strong> on the lower half of the breastbone, compress to one-third of the chest depth<br>
+            4. Continue at <strong>30:2 ratio</strong><br>
+            5. Rate: <strong>100–120 compressions per minute</strong>
+          </div>
+        </div>
+        <div class="content-section">
+          <h3>Using an AED (Automated External Defibrillator)</h3>
+          <p class="reveal-el">If an AED is available, use it as soon as possible. For children under 8 or weighing under 25kg, use <strong>paediatric pads</strong> if available. If only adult pads are available, use them — <strong>do not delay defibrillation</strong>. Place the pads front and back on a small child/infant.</p>
+          <div class="info-box key-point reveal-el">
+            <strong>🔑 Key Point</strong>
+            The ratio of compressions to breaths for paediatric CPR is <strong>30:2</strong> for single rescuers. Always start with 5 rescue breaths before compressions.
+          </div>
+        </div>
+        <div class="knowledge-check reveal-el" data-answer="0">
+          <div class="kc-header">💡 Knowledge Check</div>
+          <div class="kc-question">How many initial rescue breaths should you give before starting chest compressions on a child?</div>
+          <div class="kc-options">
+            <div class="kc-option" data-idx="0"><div class="radio"></div>5</div>
+            <div class="kc-option" data-idx="1"><div class="radio"></div>2</div>
+            <div class="kc-option" data-idx="2"><div class="radio"></div>3</div>
+            <div class="kc-option" data-idx="3"><div class="radio"></div>10</div>
+          </div>
+          <div class="kc-feedback correct">✅ Correct! Give 5 initial rescue breaths before starting compressions.</div>
+          <div class="kc-feedback incorrect">❌ You should give 5 initial rescue breaths before starting chest compressions.</div>
+          <button class="kc-submit" onclick="checkKC(this)">Check Answer</button>
+        </div>
+        <button class="btn btn-next" onclick="completeAndNext(3)">Continue to Module 4 →</button>
+      </div>
+
+      <!-- ═══ MODULE 4: RECOVERY POSITION ═════════════════ -->
+      <div class="module" id="mod4">
+        <div class="module-header">
+          <div class="module-tag">Module 4 of 11</div>
+          <h2>Recovery Position &amp; Airway Management</h2>
+          <p class="subtitle">Keeping the airway clear in an unconscious but breathing casualty</p>
+        </div>
+        <div class="content-section">
+          <h3>When to Use the Recovery Position</h3>
+          <p class="reveal-el">Place a casualty in the recovery position when they are <strong>unconscious but breathing normally</strong>. This keeps the airway open and allows fluids (like vomit) to drain, preventing choking.</p>
+          <h3>Child Recovery Position</h3>
+          <ol class="step-list">
+            <li class="reveal-el">Kneel beside the child. Place their nearest arm at right angles to their body.</li>
+            <li class="reveal-el">Bring the far arm across their chest and hold the back of their hand against their nearest cheek.</li>
+            <li class="reveal-el">With your other hand, pull the far knee up so the foot is flat on the floor.</li>
+            <li class="reveal-el">Keeping their hand against their cheek, pull the far knee towards you to roll them onto their side.</li>
+            <li class="reveal-el">Tilt the head back to maintain an open airway. Adjust the hand under the cheek if needed.</li>
+          </ol>
+          <h3>Infant Recovery Position</h3>
+          <p class="reveal-el">For infants under 1 year, hold them in your arms on their side with their head tilted slightly downward. This is sometimes called the "tiger in a tree" position. This prevents the tongue from blocking the airway and allows fluids to drain.</p>
+        </div>
+        <div class="knowledge-check reveal-el" data-answer="1">
+          <div class="kc-header">💡 Knowledge Check</div>
+          <div class="kc-question">When should you place a child in the recovery position?</div>
+          <div class="kc-options">
+            <div class="kc-option" data-idx="0"><div class="radio"></div>When they are conscious and breathing</div>
+            <div class="kc-option" data-idx="1"><div class="radio"></div>When they are unconscious but breathing normally</div>
+            <div class="kc-option" data-idx="2"><div class="radio"></div>When they are not breathing</div>
+            <div class="kc-option" data-idx="3"><div class="radio"></div>When they have a broken arm</div>
+          </div>
+          <div class="kc-feedback correct">✅ Correct! The recovery position is for casualties who are unconscious but breathing normally.</div>
+          <div class="kc-feedback incorrect">❌ The recovery position is used when a casualty is unconscious but breathing normally.</div>
+          <button class="kc-submit" onclick="checkKC(this)">Check Answer</button>
+        </div>
+        <button class="btn btn-next" onclick="completeAndNext(4)">Continue to Module 5 →</button>
+      </div>
+
+      <!-- ═══ MODULE 5: CHOKING ═══════════════════════════ -->
+      <div class="module" id="mod5">
+        <div class="module-header">
+          <div class="module-tag">Module 5 of 11</div>
+          <h2>Choking</h2>
+          <p class="subtitle">Managing choking in infants and children</p>
+        </div>
+        <div class="content-section">
+          <h3>Recognising Choking</h3>
+          <p class="reveal-el">Choking occurs when the airway is partially or completely blocked. Signs include: sudden difficulty breathing, inability to cry or speak, clutching at the throat, blue discolouration of the lips, and a silent or high-pitched cough.</p>
+          <div class="info-box warning reveal-el">
+            <strong>⚠️ Mild vs Severe Choking</strong>
+            <strong>Mild choking:</strong> The child can still cough, speak, or cry. Encourage them to cough — do not interfere.<br>
+            <strong>Severe choking:</strong> The child cannot cough effectively, speak, or breathe. Act immediately using the procedures below.
+          </div>
+        </div>
+        <div class="content-section">
+          <h3>Child Choking (Over 1 Year)</h3>
+          <ol class="step-list">
+            <li class="reveal-el"><strong>Back blows:</strong> Lean the child forward. Give up to 5 sharp back blows between the shoulder blades with the heel of your hand.</li>
+            <li class="reveal-el"><strong>Abdominal thrusts:</strong> Stand behind the child, place a fist between the navel and ribcage, grasp with the other hand, and pull sharply inwards and upwards. Give up to 5 thrusts.</li>
+            <li class="reveal-el">Alternate between 5 back blows and 5 abdominal thrusts until the object is dislodged or the child becomes unconscious.</li>
+            <li class="reveal-el">If the child becomes unconscious, begin CPR and call 999.</li>
+          </ol>
+        </div>
+        <div class="content-section">
+          <h3>Infant Choking (Under 1 Year)</h3>
+          <ol class="step-list">
+            <li class="reveal-el"><strong>Back blows:</strong> Lay the infant face-down along your forearm (supporting the head). Give up to 5 sharp back blows between the shoulder blades.</li>
+            <li class="reveal-el"><strong>Chest thrusts (NOT abdominal thrusts):</strong> Turn the infant face-up. Using two fingers, give up to 5 chest thrusts (similar position to CPR compressions but sharper and slower).</li>
+            <li class="reveal-el">Alternate between 5 back blows and 5 chest thrusts.</li>
+            <li class="reveal-el">If the infant becomes unconscious, begin infant CPR and call 999.</li>
+          </ol>
+          <div class="info-box important reveal-el">
+            <strong>❗ Never use abdominal thrusts on an infant</strong>
+            Abdominal thrusts can damage internal organs in infants. Use <strong>chest thrusts</strong> instead.
+          </div>
+        </div>
+        <div class="knowledge-check reveal-el" data-answer="2">
+          <div class="kc-header">💡 Knowledge Check</div>
+          <div class="kc-question">What technique should you use for a choking infant instead of abdominal thrusts?</div>
+          <div class="kc-options">
+            <div class="kc-option" data-idx="0"><div class="radio"></div>Finger sweeps</div>
+            <div class="kc-option" data-idx="1"><div class="radio"></div>Abdominal thrusts but more gently</div>
+            <div class="kc-option" data-idx="2"><div class="radio"></div>Chest thrusts</div>
+            <div class="kc-option" data-idx="3"><div class="radio"></div>Heimlich manoeuvre</div>
+          </div>
+          <div class="kc-feedback correct">✅ Correct! Use chest thrusts for infants — never abdominal thrusts.</div>
+          <div class="kc-feedback incorrect">❌ For infants, use chest thrusts instead of abdominal thrusts to avoid organ damage.</div>
+          <button class="kc-submit" onclick="checkKC(this)">Check Answer</button>
+        </div>
+        <button class="btn btn-next" onclick="completeAndNext(5)">Continue to Module 6 →</button>
+      </div>
+
+      <!-- ═══ MODULE 6: BLEEDING, WOUNDS & SHOCK ══════════ -->
+      <div class="module" id="mod6">
+        <div class="module-header">
+          <div class="module-tag">Module 6 of 11</div>
+          <h2>Bleeding, Wounds &amp; Shock</h2>
+          <p class="subtitle">Managing bleeding and recognising shock in children</p>
+        </div>
+        <div class="content-section">
+          <h3>Controlling Bleeding</h3>
+          <p class="reveal-el">For external bleeding, apply <strong>direct pressure</strong> to the wound using a clean pad or dressing. If blood soaks through, add another pad on top — do not remove the first. Elevate the injured area above the heart if possible.</p>
+          <div class="info-box procedure reveal-el">
+            <strong>🩹 Severe Bleeding Steps</strong>
+            1. Apply firm direct pressure with a sterile dressing or clean cloth<br>
+            2. Elevate the injured limb above the heart<br>
+            3. Call 999 if bleeding is severe or won't stop<br>
+            4. Keep the child warm and still<br>
+            5. Monitor for signs of shock
+          </div>
+        </div>
+        <div class="content-section">
+          <h3>Recognising and Treating Shock</h3>
+          <p class="reveal-el">Shock occurs when the body's circulatory system fails to supply enough oxygenated blood. In children, signs include: pale, cold, clammy skin; rapid breathing; weakness; thirst; nausea; and eventually loss of consciousness.</p>
+          <div class="info-box warning reveal-el">
+            <strong>⚠️ Treating Shock</strong>
+            Lay the child down and raise their legs (unless a fracture prevents this). Keep them warm with a blanket. Do NOT give them anything to eat or drink. Call 999 and monitor constantly.
+          </div>
+        </div>
+        <div class="content-section">
+          <h3>Nosebleeds</h3>
+          <p class="reveal-el">Sit the child down, lean them forward, and pinch the soft part of the nose firmly for at least 10 minutes. Do not tilt the head back. If the bleeding lasts more than 20 minutes, seek medical help.</p>
+        </div>
+        <div class="knowledge-check reveal-el" data-answer="0">
+          <div class="kc-header">💡 Knowledge Check</div>
+          <div class="kc-question">If blood soaks through the first dressing on a wound, what should you do?</div>
+          <div class="kc-options">
+            <div class="kc-option" data-idx="0"><div class="radio"></div>Add another dressing on top of the first one</div>
+            <div class="kc-option" data-idx="1"><div class="radio"></div>Remove the first dressing and apply a new one</div>
+            <div class="kc-option" data-idx="2"><div class="radio"></div>Apply a tourniquet immediately</div>
+            <div class="kc-option" data-idx="3"><div class="radio"></div>Clean the wound thoroughly first</div>
+          </div>
+          <div class="kc-feedback correct">✅ Correct! Never remove the first dressing — add another on top and continue applying pressure.</div>
+          <div class="kc-feedback incorrect">❌ You should add another dressing on top — removing the first could disturb clotting.</div>
+          <button class="kc-submit" onclick="checkKC(this)">Check Answer</button>
+        </div>
+        <button class="btn btn-next" onclick="completeAndNext(6)">Continue to Module 7 →</button>
+      </div>
+
+      <!-- ═══ MODULE 7: BURNS & SCALDS ════════════════════ -->
+      <div class="module" id="mod7">
+        <div class="module-header">
+          <div class="module-tag">Module 7 of 11</div>
+          <h2>Burns &amp; Scalds</h2>
+          <p class="subtitle">Immediate first aid for thermal injuries in children</p>
+        </div>
+        <div class="content-section">
+          <h3>First Aid for Burns</h3>
+          <div class="info-box procedure reveal-el">
+            <strong>🔥 Burns Treatment</strong>
+            1. <strong>Cool the burn</strong> under cool running water for at least <strong>20 minutes</strong> (not ice or iced water)<br>
+            2. Call 999 for serious burns (larger than the child's palm, on the face/hands/feet/joints, or full-thickness)<br>
+            3. Remove clothing and jewellery near the burn <strong>unless stuck</strong><br>
+            4. Cover with cling film (loosely, lengthways) or a sterile dressing<br>
+            5. Keep the child warm (cooling the burn can cause hypothermia in small children)<br>
+            6. <strong>Do NOT</strong> apply creams, butter, toothpaste, or burst blisters
+          </div>
+          <div class="info-box warning reveal-el">
+            <strong>⚠️ Chemical Burns</strong>
+            For chemical burns, brush off any dry chemicals first, then flood with water for at least 20 minutes. Wear gloves if possible to protect yourself.
+          </div>
+        </div>
+        <div class="knowledge-check reveal-el" data-answer="3">
+          <div class="kc-header">💡 Knowledge Check</div>
+          <div class="kc-question">How long should you cool a burn under running water?</div>
+          <div class="kc-options">
+            <div class="kc-option" data-idx="0"><div class="radio"></div>5 minutes</div>
+            <div class="kc-option" data-idx="1"><div class="radio"></div>10 minutes</div>
+            <div class="kc-option" data-idx="2"><div class="radio"></div>15 minutes</div>
+            <div class="kc-option" data-idx="3"><div class="radio"></div>At least 20 minutes</div>
+          </div>
+          <div class="kc-feedback correct">✅ Correct! Cool burns under running water for at least 20 minutes.</div>
+          <div class="kc-feedback incorrect">❌ Burns should be cooled under running water for at least 20 minutes.</div>
+          <button class="kc-submit" onclick="checkKC(this)">Check Answer</button>
+        </div>
+        <button class="btn btn-next" onclick="completeAndNext(7)">Continue to Module 8 →</button>
+      </div>
+
+      <!-- ═══ MODULE 8: HEAD INJURIES & FRACTURES ═════════ -->
+      <div class="module" id="mod8">
+        <div class="module-header">
+          <div class="module-tag">Module 8 of 11</div>
+          <h2>Head Injuries &amp; Fractures</h2>
+          <p class="subtitle">Recognising and managing skeletal and head injuries</p>
+        </div>
+        <div class="content-section">
+          <h3>Head Injuries</h3>
+          <p class="reveal-el">All head injuries in children should be taken seriously. Call 999 if the child: loses consciousness (even briefly), has seizures, has clear fluid coming from ears or nose, has unequal pupils, has persistent vomiting, or is increasingly drowsy or confused.</p>
+          <div class="info-box warning reveal-el">
+            <strong>⚠️ Concussion Red Flags</strong>
+            After any head injury, watch for: worsening headache, repeated vomiting, confusion, unusual behaviour, difficulty staying awake, or weakness on one side. Seek immediate medical attention.
+          </div>
+        </div>
+        <div class="content-section">
+          <h3>Fractures</h3>
+          <p class="reveal-el">Signs of a fracture include: pain, swelling, deformity, loss of movement, and bruising. <strong>Do not try to straighten or move the limb.</strong> Support and immobilise it in the position found using padding and bandages. Apply ice wrapped in cloth to reduce swelling and call for medical help.</p>
+          <div class="info-box tip reveal-el">
+            <strong>💡 Open vs Closed Fractures</strong>
+            An <strong>open fracture</strong> (bone piercing the skin) requires covering the wound with a sterile dressing without pressing on the bone, and calling 999 immediately. Treat for shock and bleeding.
+          </div>
+        </div>
+        <div class="knowledge-check reveal-el" data-answer="1">
+          <div class="kc-header">💡 Knowledge Check</div>
+          <div class="kc-question">A child falls and you suspect a broken arm. What should you do first?</div>
+          <div class="kc-options">
+            <div class="kc-option" data-idx="0"><div class="radio"></div>Try to straighten the arm gently</div>
+            <div class="kc-option" data-idx="1"><div class="radio"></div>Support and immobilise the arm in the position found</div>
+            <div class="kc-option" data-idx="2"><div class="radio"></div>Apply a splint tightly</div>
+            <div class="kc-option" data-idx="3"><div class="radio"></div>Ask the child to move their fingers to test for breaks</div>
+          </div>
+          <div class="kc-feedback correct">✅ Correct! Support and immobilise in the position found — never try to straighten a fracture.</div>
+          <div class="kc-feedback incorrect">❌ Always support and immobilise a suspected fracture in the position found.</div>
+          <button class="kc-submit" onclick="checkKC(this)">Check Answer</button>
+        </div>
+        <button class="btn btn-next" onclick="completeAndNext(8)">Continue to Module 9 →</button>
+      </div>
+
+      <!-- ═══ MODULE 9: MEDICAL EMERGENCIES ═══════════════ -->
+      <div class="module" id="mod9">
+        <div class="module-header">
+          <div class="module-tag">Module 9 of 11</div>
+          <h2>Medical Emergencies</h2>
+          <p class="subtitle">Seizures, anaphylaxis, asthma, diabetes, and meningitis</p>
+        </div>
+        <div class="content-section">
+          <h3>Febrile Seizures</h3>
+          <p class="reveal-el">Common in children aged 6 months to 5 years, triggered by a rapid rise in temperature. <strong>Do NOT restrain the child or put anything in their mouth.</strong> Clear the area of hazards, note the time, and call 999 if the seizure lasts more than 5 minutes or it is their first seizure. Once it stops, place in the recovery position.</p>
+        </div>
+        <div class="content-section">
+          <h3>Anaphylaxis</h3>
+          <p class="reveal-el">A severe allergic reaction that can be life-threatening. Signs include: swelling of the face/throat, difficulty breathing, rash/hives, dizziness, and collapse.</p>
+          <div class="info-box procedure reveal-el">
+            <strong>💉 Anaphylaxis Treatment</strong>
+            1. Call 999 immediately<br>
+            2. If the child has a prescribed auto-injector (e.g., EpiPen), help them use it — inject into the <strong>outer mid-thigh</strong><br>
+            3. Sit them upright if breathing is difficult, or lay them down with legs raised if they feel faint<br>
+            4. A second dose can be given after 5 minutes if no improvement<br>
+            5. Monitor and be prepared to start CPR
+          </div>
+        </div>
+        <div class="content-section">
+          <h3>Asthma Attack</h3>
+          <p class="reveal-el">Help the child sit upright (do not lie them down). Help them use their <strong>blue reliever inhaler</strong> (ideally through a spacer). Give 1 puff every 30–60 seconds, up to 10 puffs. Call 999 if there is no improvement after 10 puffs, if the child is too breathless to speak, or if their lips turn blue.</p>
+        </div>
+        <div class="content-section">
+          <h3>Diabetic Emergency</h3>
+          <p class="reveal-el">A child with diabetes may experience <strong>hypoglycaemia</strong> (low blood sugar). Signs include: shakiness, confusion, sweating, pale skin, and irritability. If conscious, give a sugary drink or glucose tablets. If unconscious, do NOT give food or drink — place in recovery position and call 999.</p>
+        </div>
+        <div class="content-section">
+          <h3>Meningitis</h3>
+          <p class="reveal-el">Signs include: high fever, stiff neck, dislike of bright lights, severe headache, a rash that doesn't fade under pressure (glass test), drowsiness, and seizures. <strong>Call 999 immediately.</strong> Meningitis can progress rapidly and is life-threatening.</p>
+          <div class="info-box important reveal-el">
+            <strong>❗ The Glass Test</strong>
+            Press the side of a clear glass firmly against the rash. If the rash <strong>does not fade</strong> under pressure, it may indicate meningitis or septicaemia. Call 999 immediately. Note: the rash may not be present in early stages.
+          </div>
+        </div>
+        <div class="knowledge-check reveal-el" data-answer="2">
+          <div class="kc-header">💡 Knowledge Check</div>
+          <div class="kc-question">Where should an adrenaline auto-injector (EpiPen) be administered?</div>
+          <div class="kc-options">
+            <div class="kc-option" data-idx="0"><div class="radio"></div>Upper arm</div>
+            <div class="kc-option" data-idx="1"><div class="radio"></div>Buttock</div>
+            <div class="kc-option" data-idx="2"><div class="radio"></div>Outer mid-thigh</div>
+            <div class="kc-option" data-idx="3"><div class="radio"></div>Abdomen</div>
+          </div>
+          <div class="kc-feedback correct">✅ Correct! Auto-injectors should be administered into the outer mid-thigh.</div>
+          <div class="kc-feedback incorrect">❌ An auto-injector should be administered into the outer mid-thigh.</div>
+          <button class="kc-submit" onclick="checkKC(this)">Check Answer</button>
+        </div>
+        <button class="btn btn-next" onclick="completeAndNext(9)">Continue to Module 10 →</button>
+      </div>
+
+      <!-- ═══ MODULE 10: POISONING & OTHER INJURIES ═══════ -->
+      <div class="module" id="mod10">
+        <div class="module-header">
+          <div class="module-tag">Module 10 of 11</div>
+          <h2>Poisoning &amp; Other Injuries</h2>
+          <p class="subtitle">Accidental poisoning, bites, stings, and eye injuries</p>
+        </div>
+        <div class="content-section">
+          <h3>Poisoning</h3>
+          <p class="reveal-el">Children under 5 are most at risk of accidental poisoning from household substances. If you suspect poisoning:</p>
+          <ul>
+            <li class="reveal-el">Call 999 or take the child to A&E</li>
+            <li class="reveal-el">Try to identify what they took, how much, and when</li>
+            <li class="reveal-el">Keep a sample of the substance or the container</li>
+            <li class="reveal-el"><strong>Do NOT make the child vomit</strong></li>
+            <li class="reveal-el">If unconscious, place in the recovery position and monitor breathing</li>
+          </ul>
+        </div>
+        <div class="content-section">
+          <h3>Bites and Stings</h3>
+          <p class="reveal-el">For insect stings: remove the sting by scraping with a flat edge (do not use tweezers), wash the area, and apply a cold compress. Call 999 if signs of anaphylaxis develop. For animal bites: wash thoroughly with soap and water, control bleeding, and seek medical advice (risk of infection/tetanus).</p>
+        </div>
+        <div class="content-section">
+          <h3>Eye Injuries</h3>
+          <p class="reveal-el">For chemicals in the eye: irrigate with clean water for at least 20 minutes, tilting the head so water runs away from the unaffected eye. For embedded objects: do NOT remove — pad around the object and seek emergency help.</p>
+        </div>
+        <div class="knowledge-check reveal-el" data-answer="3">
+          <div class="kc-header">💡 Knowledge Check</div>
+          <div class="kc-question">A child has swallowed a household cleaning product. What should you NOT do?</div>
+          <div class="kc-options">
+            <div class="kc-option" data-idx="0"><div class="radio"></div>Call 999</div>
+            <div class="kc-option" data-idx="1"><div class="radio"></div>Keep a sample of the substance</div>
+            <div class="kc-option" data-idx="2"><div class="radio"></div>Monitor their breathing</div>
+            <div class="kc-option" data-idx="3"><div class="radio"></div>Make the child vomit</div>
+          </div>
+          <div class="kc-feedback correct">✅ Correct! Never induce vomiting — it can cause further damage, especially with corrosive substances.</div>
+          <div class="kc-feedback incorrect">❌ You should never make a child vomit after poisoning as it can cause further damage.</div>
+          <button class="kc-submit" onclick="checkKC(this)">Check Answer</button>
+        </div>
+        <button class="btn btn-next" onclick="completeAndNext(10)">Continue to Module 11 →</button>
+      </div>
+
+      <!-- ═══ MODULE 11: RECORDING & INFECTION CONTROL ════ -->
+      <div class="module" id="mod11">
+        <div class="module-header">
+          <div class="module-tag">Module 11 of 11</div>
+          <h2>Recording &amp; Infection Control</h2>
+          <p class="subtitle">Documentation requirements and hygiene practices</p>
+        </div>
+        <div class="content-section">
+          <h3>Recording First Aid Incidents</h3>
+          <p class="reveal-el">All first aid incidents must be recorded. Include: date and time, name and age of the child, what happened, injuries sustained, treatment given, whether parents were contacted, and whether the child was referred to hospital.</p>
+          <div class="info-box key-point reveal-el">
+            <strong>🔑 RIDDOR</strong>
+            Under the Reporting of Injuries, Diseases and Dangerous Occurrences Regulations (RIDDOR), certain serious incidents must be reported to the Health and Safety Executive (HSE).
+          </div>
+        </div>
+        <div class="content-section">
+          <h3>Infection Control</h3>
+          <p class="reveal-el">When providing first aid, always practise good infection control:</p>
+          <ul>
+            <li class="reveal-el">Wear disposable gloves when dealing with blood or body fluids</li>
+            <li class="reveal-el">Wash hands thoroughly before and after treatment</li>
+            <li class="reveal-el">Dispose of contaminated materials safely in clinical waste bags</li>
+            <li class="reveal-el">Cover any cuts or wounds you have yourself</li>
+            <li class="reveal-el">Use a face shield for rescue breaths if available</li>
+          </ul>
+        </div>
+        <div class="knowledge-check reveal-el" data-answer="0">
+          <div class="kc-header">💡 Knowledge Check</div>
+          <div class="kc-question">What should you always wear when dealing with blood?</div>
+          <div class="kc-options">
+            <div class="kc-option" data-idx="0"><div class="radio"></div>Disposable gloves</div>
+            <div class="kc-option" data-idx="1"><div class="radio"></div>A face mask</div>
+            <div class="kc-option" data-idx="2"><div class="radio"></div>A full apron</div>
+            <div class="kc-option" data-idx="3"><div class="radio"></div>Safety goggles</div>
+          </div>
+          <div class="kc-feedback correct">✅ Correct! Always wear disposable gloves when dealing with blood or body fluids.</div>
+          <div class="kc-feedback incorrect">❌ You should always wear disposable gloves when dealing with blood or body fluids.</div>
+          <button class="kc-submit" onclick="checkKC(this)">Check Answer</button>
+        </div>
+        <button class="btn btn-next" onclick="completeAndNext(11)">Proceed to Final Assessment →</button>
+      </div>
+
+      <!-- ═══ MODULE 12: FINAL ASSESSMENT ═════════════════ -->
+      <div class="module" id="mod12">
+        <div class="module-header">
+          <div class="module-tag">Final Assessment</div>
+          <h2>Paediatric First Aid Assessment</h2>
+          <p class="subtitle">You need 80% (12/15) to pass. You have <span id="attemptsLeft">3</span> attempt(s) remaining.</p>
+        </div>
+        <div id="quizArea">
+          <div class="quiz-container" id="quizContainer"></div>
+          <div style="text-align:center;margin-top:28px">
+            <button class="btn btn-primary" id="submitQuizBtn" onclick="submitQuiz()" style="font-size:1.05rem;padding:14px 40px">Submit Assessment</button>
+          </div>
+        </div>
+        <div class="quiz-results" id="quizResults" style="display:none"></div>
+      </div>
+
+      <!-- ═══ MODULE 13: CERTIFICATE ══════════════════════ -->
+      <div class="module" id="mod13">
+        <div class="module-header">
+          <div class="module-tag">🎓 Complete</div>
+          <h2>Congratulations!</h2>
+          <p class="subtitle">You have completed the Paediatric First Aid Awareness Level 2 course</p>
+        </div>
+        <div class="cert-wrapper" id="certDisplay">
+          <div class="cert-logo">Learning Cubs</div>
+          <div class="cert-title">Confirmation of Completion</div>
+          <div class="cert-name" id="certName">—</div>
+          <div class="cert-course">Paediatric First Aid Awareness — Level 2</div>
+          <div class="cert-details">
+            <div class="cert-detail"><label>Certificate No.</label><span id="certNo">—</span></div>
+            <div class="cert-detail"><label>Date</label><span id="certDate">—</span></div>
+            <div class="cert-detail"><label>Valid Until</label><span id="certExpiry">—</span></div>
+            <div class="cert-detail"><label>Score</label><span id="certScore">—</span></div>
+          </div>
+          <p style="font-size:.9rem;color:rgba(0,24,72,.5);margin:24px 0 8px">Your official certificate has been emailed to you and is also available to download below.</p>
+          <div class="cert-actions">
+            <a class="btn btn-primary" id="certDownloadBtn" href="#" target="_blank" style="display:none">📥 Download Certificate</a>
+            <button class="btn btn-secondary" id="certEmailBtn" onclick="requestEmailCert()">📧 Resend to My Email</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ═══ AUDIO FAB ══════════════════════════════════════════ -->
+<div class="audio-fab" id="audioFab" style="display:none">
+  <div class="audio-panel" id="audioPanel">
+    <label>Speed</label>
+    <input type="range" id="audioSpeed" min="0.5" max="2" step="0.1" value="1">
+    <div class="speed-val" id="speedVal">1.0x</div>
+    <button class="pause-btn" id="pauseBtn" onclick="togglePause()">⏸ Pause</button>
+    <button class="stop-btn" onclick="stopAudio()">■ Stop Narration</button>
+  </div>
+  <button class="audio-btn" id="audioBtn" onclick="toggleAudioPanel()" title="Audio Narration">🔊</button>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════ */
+/* CONFIGURATION                                               */
+/* ═══════════════════════════════════════════════════════════ */
+var APPS_SCRIPT_URL = ''; // ← Paste your deployed Apps Script web app URL here
+var COURSE_NAME = 'Paediatric First Aid';
+
+/* ═══════════════════════════════════════════════════════════ */
+/* STATE                                                       */
+/* ═══════════════════════════════════════════════════════════ */
+var S = {
+  email:'', name:'', completed:[], current:1,
+  failCount:0, maxAttempts:3, config:{}, certInfo:null,
+  audioEnabled:false, audioPaused:false, revealing:false,
+  revealQueue:[], revealTimer:null, lastScore:0
+};
+
+var MODULES = [
+  {id:1,t:'Introduction to Paediatric First Aid'},
+  {id:2,t:'Assessing an Emergency (DRABC)'},
+  {id:3,t:'Paediatric CPR'},
+  {id:4,t:'Recovery Position'},
+  {id:5,t:'Choking'},
+  {id:6,t:'Bleeding, Wounds & Shock'},
+  {id:7,t:'Burns & Scalds'},
+  {id:8,t:'Head Injuries & Fractures'},
+  {id:9,t:'Medical Emergencies'},
+  {id:10,t:'Poisoning & Other Injuries'},
+  {id:11,t:'Recording & Infection Control'},
+  {id:12,t:'Final Assessment'},
+  {id:13,t:'Certificate'}
+];
+
+/* ═══ QUIZ BANK (15 questions) ═════════════════════════════ */
+var QUIZ = [
+  {q:"What does DRABC stand for?",o:["Danger, Response, Airway, Breathing, Circulation","Diagnosis, Recovery, Assessment, Breathing, CPR","Danger, Rescue, Airway, Bandage, Call","Detection, Response, Airway, Bleeding, Compression"],a:0},
+  {q:"How many initial rescue breaths should you give an infant before starting CPR?",o:["2","5","3","10"],a:1},
+  {q:"What is the compression-to-breath ratio for single-rescuer paediatric CPR?",o:["15:2","30:2","15:1","30:1"],a:1},
+  {q:"For infant CPR, you should use which technique for chest compressions?",o:["Heel of one hand","Both hands interlocked","Two fingers","Full palm"],a:2},
+  {q:"When should you call 999 if you are alone with an unresponsive, non-breathing child?",o:["Immediately before starting CPR","After 1 minute of CPR","After 5 minutes of CPR","Only if the child doesn't recover"],a:1},
+  {q:"What should you NOT use for a choking infant?",o:["Back blows","Chest thrusts","Abdominal thrusts","Calling 999"],a:2},
+  {q:"How long should you cool a burn under running water?",o:["5 minutes","10 minutes","15 minutes","At least 20 minutes"],a:3},
+  {q:"What position should a child be in during a severe asthma attack?",o:["Lying flat on their back","On their side (recovery position)","Sitting upright","Leaning backwards"],a:2},
+  {q:"Where should an adrenaline auto-injector be administered?",o:["Upper arm","Inner thigh","Outer mid-thigh","Abdomen"],a:2},
+  {q:"What is the glass test used to check for?",o:["Dehydration","Concussion","Meningitis rash","Blood sugar levels"],a:2},
+  {q:"If blood soaks through the first dressing, you should:",o:["Add another dressing on top","Remove the first and reapply","Apply a tourniquet","Wash the wound and redress"],a:0},
+  {q:"What should you NOT do if a child has swallowed a poisonous substance?",o:["Call 999","Keep a sample of the substance","Monitor their breathing","Make them vomit"],a:3},
+  {q:"In the recovery position, the airway is kept open by:",o:["Inserting an oral airway","Tilting the head back","Keeping the child on their back","Sitting them upright"],a:1},
+  {q:"What rate should chest compressions be given at?",o:["60-80 per minute","80-100 per minute","100-120 per minute","120-140 per minute"],a:2},
+  {q:"For a child with suspected hypoglycaemia who is conscious, you should:",o:["Give insulin","Give a sugary drink","Put them in recovery position","Call 999 immediately and do nothing"],a:1}
+];
+
+/* ═══ LOGIN & VERIFICATION ═════════════════════════════════ */
+function handleLogin(){
+  var name=document.getElementById('loginName').value.trim();
+  var email=document.getElementById('loginEmail').value.trim().toLowerCase();
+  if(!name||!email){showErr('Please enter your name and email.');return}
+  var btn=document.getElementById('loginBtn');
+  btn.disabled=true;btn.textContent='Verifying...';
+
+  var url=APPS_SCRIPT_URL+'?action=verify&name='+encodeURIComponent(name)+'&email='+encodeURIComponent(email)+'&course='+encodeURIComponent(COURSE_NAME);
+  fetch(url).then(function(r){return r.json()}).then(function(d){
+    if(!d.success){showErr(d.error||'Verification failed.');btn.disabled=false;btn.textContent='Start Training';return}
+    S.email=d.email;S.name=d.name||name;S.failCount=d.failCount||0;S.maxAttempts=d.maxAttempts||3;S.config=d.config||{};S.certInfo=d.existingCert||null;
+    loadProgress();
+    document.getElementById('loginOverlay').classList.add('hidden');
+    document.getElementById('appShell').style.display='flex';
+    document.getElementById('audioFab').style.display='flex';
+    document.getElementById('userName').textContent=S.name.split(' ')[0];
+    document.getElementById('userAvatar').textContent=S.name.charAt(0).toUpperCase();
+    buildSidebar();navigateTo(1);
+  }).catch(function(e){showErr('Network error. Please try again.');btn.disabled=false;btn.textContent='Start Training'});
+}
+function showErr(m){document.getElementById('loginError').textContent=m}
+
+/* ═══ PROGRESS PERSISTENCE ═════════════════════════════════ */
+function saveProgress(){
+  if(!S.email)return;
+  var data={completed:S.completed,ts:Date.now()};
+  try{localStorage.setItem('lcpfa_'+S.email,JSON.stringify(data))}catch(e){}
+}
+function loadProgress(){
+  if(!S.email)return;
+  try{
+    var raw=localStorage.getItem('lcpfa_'+S.email);
+    if(!raw)return;
+    var data=JSON.parse(raw);
+    if(Date.now()-data.ts>30*24*60*60*1000){localStorage.removeItem('lcpfa_'+S.email);return}
+    S.completed=data.completed||[];
+  }catch(e){}
+}
+
+/* ═══ SIDEBAR ══════════════════════════════════════════════ */
+function buildSidebar(){
+  var nav=document.getElementById('sidebarNav');nav.innerHTML='';
+  MODULES.forEach(function(m){
+    var d=document.createElement('div');d.className='nav-item';d.dataset.mod=m.id;
+    if(S.completed.indexOf(m.id)>-1)d.classList.add('completed');
+    d.innerHTML='<div class="nav-num">'+m.id+'</div>'+m.t;
+    d.addEventListener('click',function(){if(m.id<=getMaxAcc())navigateTo(m.id)});
+    nav.appendChild(d);
+  });
+  updateNav();
+}
+function updateNav(){
+  var mx=getMaxAcc();
+  document.querySelectorAll('.nav-item').forEach(function(el){
+    var id=parseInt(el.dataset.mod);
+    el.classList.toggle('locked',id>mx);
+    el.classList.toggle('active',id===S.current);
+    el.classList.toggle('completed',S.completed.indexOf(id)>-1&&id!==S.current);
+  });
+  var pct=Math.round((S.completed.length/MODULES.length)*100);
+  document.getElementById('progressBar').style.width=pct+'%';
+  document.getElementById('topbarTitle').textContent='Module '+S.current+' of 13';
+}
+function getMaxAcc(){
+  if(S.completed.length===0)return 1;
+  return Math.min(Math.max.apply(null,S.completed)+1,13);
+}
+
+/* ═══ NAVIGATION ═══════════════════════════════════════════ */
+function navigateTo(id){
+  stopAudio();
+  S.current=id;
+  document.querySelectorAll('.module').forEach(function(el){el.classList.remove('active')});
+  var t=document.getElementById('mod'+id);
+  if(t)t.classList.add('active');
+  updateNav();
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  // Check if returning user already completed this module
+  var alreadyDone=S.completed.indexOf(id)>-1;
+
+  if(id===12)buildQuiz();
+  else if(id===13)showCert();
+  else startReveal(id,alreadyDone);
+}
+function completeAndNext(id){
+  if(S.completed.indexOf(id)===-1)S.completed.push(id);
+  saveProgress();
+  navigateTo(id+1);
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+
+/* ═══ WORD-BY-WORD CONTENT REVEAL ══════════════════════════ */
+function startReveal(modId,skipReveal){
+  var mod=document.getElementById('mod'+modId);
+  if(!mod)return;
+  var els=mod.querySelectorAll('.reveal-el');
+  if(skipReveal){
+    els.forEach(function(el){el.classList.add('revealed')});
+    return;
+  }
+  // Reset
+  els.forEach(function(el){el.classList.remove('revealed','speaking')});
+  S.revealQueue=Array.from(els);
+  S.revealing=true;
+  revealNext();
+}
+
+function revealNext(){
+  if(!S.revealing||S.revealQueue.length===0){S.revealing=false;return}
+  if(S.audioPaused)return;
+
+  var el=S.revealQueue.shift();
+  el.classList.add('revealed');
+
+  // Calculate delay based on word count (~360 words/min = 167ms per word)
+  var words=(el.textContent||'').trim().split(/\s+/).length;
+  var delay=Math.max(words*167,500); // min 500ms
+
+  if(S.audioEnabled&&window.speechSynthesis){
+    el.classList.add('speaking');
+    var text=(el.textContent||'').trim();
+    if(text){
+      var utt=new SpeechSynthesisUtterance(text);
+      utt.rate=parseFloat(document.getElementById('audioSpeed').value)||1;
+      utt.lang='en-GB';
+      // Try to find a UK voice
+      var voices=speechSynthesis.getVoices();
+      var ukVoice=voices.find(function(v){return v.lang==='en-GB'});
+      if(ukVoice)utt.voice=ukVoice;
+      utt.onend=function(){
+        el.classList.remove('speaking');
+        if(S.revealing&&!S.audioPaused)revealNext();
+      };
+      speechSynthesis.speak(utt);
+      return; // Wait for onend
+    }
+  }
+
+  // Timer-based fallback
+  S.revealTimer=setTimeout(function(){
+    el.classList.remove('speaking');
+    revealNext();
+  },delay);
+}
+
+/* ═══ AUDIO CONTROLS ═══════════════════════════════════════ */
+function toggleAudioPanel(){
+  var panel=document.getElementById('audioPanel');
+  var btn=document.getElementById('audioBtn');
+  if(panel.classList.contains('show')){
+    panel.classList.remove('show');
+  } else {
+    panel.classList.add('show');
+    if(!S.audioEnabled){
+      S.audioEnabled=true;btn.classList.add('active');
+      // Load voices
+      if(window.speechSynthesis)speechSynthesis.getVoices();
+    }
+  }
+}
+function togglePause(){
+  if(!S.audioEnabled)return;
+  S.audioPaused=!S.audioPaused;
+  document.getElementById('pauseBtn').textContent=S.audioPaused?'▶ Resume':'⏸ Pause';
+  if(S.audioPaused&&window.speechSynthesis)speechSynthesis.pause();
+  else if(!S.audioPaused){
+    if(window.speechSynthesis)speechSynthesis.resume();
+    if(S.revealing)revealNext();
+  }
+}
+function stopAudio(){
+  S.audioEnabled=false;S.audioPaused=false;S.revealing=false;
+  clearTimeout(S.revealTimer);
+  if(window.speechSynthesis){speechSynthesis.cancel()}
+  document.getElementById('audioBtn').classList.remove('active');
+  document.getElementById('audioPanel').classList.remove('show');
+  document.getElementById('pauseBtn').textContent='⏸ Pause';
+  document.querySelectorAll('.speaking').forEach(function(el){el.classList.remove('speaking')});
+}
+document.getElementById('audioSpeed').addEventListener('input',function(){
+  document.getElementById('speedVal').textContent=this.value+'x';
+});
+
+/* ═══ KNOWLEDGE CHECKS ═════════════════════════════════════ */
+function checkKC(btn){
+  var kc=btn.closest('.knowledge-check');
+  var correct=parseInt(kc.dataset.answer);
+  var sel=kc.querySelector('.kc-option.selected');
+  if(!sel)return;
+  var idx=parseInt(sel.dataset.idx);
+  var ok=idx===correct;
+  kc.querySelectorAll('.kc-option').forEach(function(o){
+    var i=parseInt(o.dataset.idx);
+    if(i===correct)o.classList.add('correct');
+    else if(i===idx&&!ok)o.classList.add('incorrect');
+    o.style.pointerEvents='none';
+  });
+  kc.querySelector('.kc-feedback.'+(ok?'correct':'incorrect')).classList.add('show');
+  btn.disabled=true;
+}
+document.addEventListener('click',function(e){
+  var opt=e.target.closest('.kc-option');
+  if(!opt||opt.classList.contains('correct')||opt.classList.contains('incorrect'))return;
+  var kc=opt.closest('.knowledge-check,.quiz-question');
+  kc.querySelectorAll('.kc-option').forEach(function(o){o.classList.remove('selected')});
+  opt.classList.add('selected');
+});
+
+/* ═══ QUIZ ═════════════════════════════════════════════════ */
+function buildQuiz(){
+  var rem=S.maxAttempts-S.failCount;
+  document.getElementById('attemptsLeft').textContent=rem;
+  if(rem<=0){
+    document.getElementById('quizArea').innerHTML='<div class="info-box warning"><strong>⚠️ Maximum Attempts Reached</strong>You have used all '+S.maxAttempts+' attempts. Contact HR for a reset.</div>';
+    return;
+  }
+  var c=document.getElementById('quizContainer');c.innerHTML='';
+  document.getElementById('quizResults').style.display='none';
+  document.getElementById('quizArea').style.display='block';
+  document.getElementById('submitQuizBtn').style.display='inline-flex';
+
+  QUIZ.forEach(function(q,i){
+    var d=document.createElement('div');d.className='quiz-question';d.dataset.answer=q.a;
+    var opts='';q.o.forEach(function(o,j){opts+='<div class="kc-option" data-idx="'+j+'"><div class="radio"></div>'+o+'</div>'});
+    d.innerHTML='<div class="q-num">Question '+(i+1)+' of 15</div><div class="q-text">'+q.q+'</div><div class="kc-options">'+opts+'</div>';
+    c.appendChild(d);
+  });
+}
+
+function submitQuiz(){
+  var qs=document.querySelectorAll('#quizContainer .quiz-question');
+  var score=0,all=true;
+  qs.forEach(function(q){
+    var sel=q.querySelector('.kc-option.selected');
+    if(!sel){all=false;return}
+    var correct=parseInt(q.dataset.answer),chosen=parseInt(sel.dataset.idx);
+    if(chosen===correct)score++;
+    q.querySelectorAll('.kc-option').forEach(function(o){
+      var i=parseInt(o.dataset.idx);
+      if(i===correct)o.classList.add('correct');
+      else if(i===chosen&&chosen!==correct)o.classList.add('incorrect');
+      o.style.pointerEvents='none';
+    });
+  });
+  if(!all){alert('Please answer all questions.');return}
+
+  var pct=Math.round((score/15)*100);
+  var passed=pct>=80;
+  S.lastScore=pct;
+
+  // Log to backend
+  postToBackend({action:'logresult',course:COURSE_NAME,email:S.email,name:S.name,score:score,total:15,version:'1.0'});
+
+  document.getElementById('submitQuizBtn').style.display='none';
+  var r=document.getElementById('quizResults');
+  r.className='quiz-results '+(passed?'pass':'fail');r.style.display='block';
+
+  if(passed){
+    r.innerHTML='<h3>🎉 You Passed!</h3><div class="score-display">'+pct+'%</div><p>You scored '+score+'/15. Congratulations!</p><button class="btn btn-primary" onclick="completeAndNext(12)" style="margin-top:20px">View Certificate →</button>';
+    if(S.completed.indexOf(12)===-1)S.completed.push(12);
+    saveProgress();
+  } else {
+    S.failCount++;
+    var rem=S.maxAttempts-S.failCount;
+    r.innerHTML='<h3>Not Quite</h3><div class="score-display">'+pct+'%</div><p>You scored '+score+'/15. You need 80% (12/15) to pass.</p><p>'+(rem>0?'You have <strong>'+rem+'</strong> attempt(s) remaining.':'No attempts remaining. Contact HR.')+'</p>'+(rem>0?'<button class="btn btn-outline" onclick="buildQuiz()" style="margin-top:16px">Retry Assessment</button>':'');
+  }
+  r.scrollIntoView({behavior:'smooth'});
+}
+
+/* ═══ CERTIFICATE ══════════════════════════════════════════ */
+function showCert(){
+  if(S.certInfo){displayCert(S.certInfo);return}
+  document.getElementById('certName').textContent=S.name;
+  document.getElementById('certNo').textContent='Generating...';
+
+  postToBackend({action:'logcertificate',course:COURSE_NAME,email:S.email,name:S.name,score:S.lastScore+'%'},function(d){
+    if(d&&d.success){S.certInfo=d;displayCert(d)}
+    else{document.getElementById('certNo').textContent='Error'}
+  });
+}
+
+function displayCert(c){
+  document.getElementById('certName').textContent=S.name;
+  document.getElementById('certNo').textContent=c.certNo||'—';
+  document.getElementById('certDate').textContent=c.date||c.issued||'—';
+  document.getElementById('certExpiry').textContent=c.expiry||'—';
+  document.getElementById('certScore').textContent=c.score||'—';
+  if(c.link){
+    var dl=document.getElementById('certDownloadBtn');
+    dl.href=c.link;dl.style.display='inline-flex';
+  }
+}
+
+function requestEmailCert(){
+  if(!S.certInfo)return;
+  postToBackend({action:'emailcertificate',email:S.email,course:COURSE_NAME,certNo:S.certInfo.certNo||''},function(d){
+    alert(d&&d.success?'Certificate emailed to '+S.email:'Failed to email certificate.');
+  });
+}
+
+/* ═══ BACKEND COMMUNICATION ════════════════════════════════ */
+function postToBackend(body,cb){
+  fetch(APPS_SCRIPT_URL,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(body)
+  }).then(function(r){return r.json()}).then(function(d){if(cb)cb(d)}).catch(function(e){console.error('Backend error:',e);if(cb)cb({success:false,error:e.message})});
+}
+
+/* ═══ INIT ═════════════════════════════════════════════════ */
+document.getElementById('loginEmail').addEventListener('keydown',function(e){if(e.key==='Enter')handleLogin()});
+document.getElementById('loginName').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('loginEmail').focus()});
+// Preload voices
+if(window.speechSynthesis){speechSynthesis.onvoiceschanged=function(){speechSynthesis.getVoices()}}
+</script>
+</body>
+</html>
