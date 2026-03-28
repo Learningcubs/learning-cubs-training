@@ -397,7 +397,7 @@ document.getElementById('modalErr').textContent='';
 
 var brSelect=document.getElementById('mBranch');
 brSelect.innerHTML='';
-var branches=Object.keys(DATA.stats.branches||{}).sort();
+var branches=DATA.branches||Object.keys(DATA.stats.branches||{}).sort();
 branches.forEach(function(b){var o=document.createElement('option');o.value=b;o.textContent=b;brSelect.appendChild(o)});
 
 var coursesDiv=document.getElementById('mCourses');
