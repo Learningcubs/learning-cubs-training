@@ -307,7 +307,7 @@ function setFilter(type,val){FILTERS[type]=val;SELECTED={};updateBulkBar();rende
 function renderTable(){
 var q=(document.getElementById('searchBox').value||'').toLowerCase();
 var rows=DATA.rows.filter(function(r){
-if(FILTERS.branch!=='All'&&r.branch!==FILTERS.branch)return false;
+if(FILTERS.branch!=='All'){var rb=r.branch||'Unassigned';if(rb!==FILTERS.branch)return false}
 if(FILTERS.status==='Expiring'){if(!r.expiryWarning)return false}
 else if(FILTERS.status!=='All'&&r.status!==FILTERS.status)return false;
 if(q&&r.name.toLowerCase().indexOf(q)===-1&&r.email.toLowerCase().indexOf(q)===-1)return false;
