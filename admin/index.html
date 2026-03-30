@@ -169,6 +169,7 @@ body{font-family:var(--fb);background:var(--cream1);color:var(--navy);min-height
 </div>
 </div>
 
+
 <!-- MAIN APP -->
 <div id="app" style="display:none">
 <div class="nav">
@@ -179,6 +180,7 @@ body{font-family:var(--fb);background:var(--cream1);color:var(--navy);min-height
 </div>
 <div class="nav-right">
 <div class="nav-user" id="navUser"></div>
+<button class="nav-btn" onclick="openChangePassword()">Change password</button>
 <button class="nav-btn" onclick="signOut()">Sign out</button>
 </div>
 </div>
@@ -448,6 +450,19 @@ closeModal();loadDashboard();
 function deleteTutor(email){
 if(!confirm('Delete this tutor? This cannot be undone.'))return;
 post({action:'deletetutor',token:TOKEN,email:email},function(d){if(d.success){closeModal();loadDashboard()}});
+}
+
+function openChangePassword(){
+var curr=prompt('Enter your current password:');
+if(!curr)return;
+var newp=prompt('Enter your new password:');
+if(!newp)return;
+if(newp.length<5){alert('Password must be at least 5 characters.');return}
+var conf=prompt('Confirm your new password:');
+if(newp!==conf){alert('Passwords do not match.');return}
+post({action:'changepassword',token:TOKEN,currentPassword:curr,newPassword:newp},function(d){
+alert(d.success?'Password changed successfully.':d.error||'Failed to change password.');
+});
 }
 
 // CSV EXPORT
