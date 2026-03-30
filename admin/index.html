@@ -248,7 +248,7 @@ post({action:'adminlogin',email:email,password:pass},function(d){
 btn.disabled=false;btn.textContent='Sign In';
 if(!d.success){document.getElementById('loginErr').textContent=d.error||'Login failed.';return}
 TOKEN=d.token;ADMIN={name:d.name,branches:d.branches,role:d.role};
-document.getElementById('loginOverlay').classList.add('hidden');
+try{sessionStorage.setItem('lc_admin',JSON.stringify({token:d.token,name:d.name,branches:d.branches,role:d.role}))}catch(e){}document.getElementById('loginOverlay').classList.add('hidden');
 document.getElementById('app').style.display='block';
 document.getElementById('navUser').textContent=ADMIN.name+' ('+(ADMIN.branches==='All'?'All branches':ADMIN.branches)+')';
 loadDashboard();
@@ -258,8 +258,8 @@ document.getElementById('loginPass').addEventListener('keydown',function(e){if(e
 document.getElementById('loginEmail').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('loginPass').focus()});
 
 // SESSION
-function signOut(){TOKEN='';ADMIN={};document.getElementById('app').style.display='none';document.getElementById('loginOverlay').classList.remove('hidden');document.getElementById('loginErr').textContent=''}
-
+function signOut(){TOKEN='';ADMIN={};try{sessionStorage.removeItem('lc_admin');sessionStorage.removeItem('lc_admin_filters')}catch(e){}document.getElementById('app').style.display='none';document.getElementById('loginOverlay').classList.remove('hidden');document.getElementById('loginErr').textContent=''}
+  
 // LOAD DATA
 function loadDashboard(){
 document.getElementById('tBody').innerHTML='<tr><td colspan="10" class="loading">Loading dashboard...</td></tr>';
@@ -303,7 +303,7 @@ h+='<button class="pill s-expiring'+(FILTERS.status==='Expiring'?' active':'')+'
 document.getElementById('filtersRow').innerHTML=h;
 }
 
-function setFilter(type,val){FILTERS[type]=val;SELECTED={};updateBulkBar();renderFilters();renderTable()}
+function setFilter(type,val){FILTERS[type]=val;SELECTED={};updateBulkBar();renderFilters();renderTable();try{sessionStorage.setItem('lc_admin_filters',JSON.stringify(FILTERS))}catch(e){}}
 
 // TABLE
 function renderTable(){
@@ -479,6 +479,8 @@ var a=document.createElement('a');
 a.href=url;a.download='training-dashboard-'+new Date().toISOString().split('T')[0]+'.csv';
 a.click();URL.revokeObjectURL(url);
 }
+});
+(function(){try{var s=sessionStorage.getItem('lc_admin');if(s){var d=JSON.parse(s);TOKEN=d.token;ADMIN={name:d.name,branches:d.branches,role:d.role};document.getElementById('loginOverlay').classList.add('hidden');document.getElementById('app').style.display='block';document.getElementById('navUser').textContent=ADMIN.name+' ('+(ADMIN.branches==='All'?'All branches':ADMIN.branches)+')';try{var f=sessionStorage.getItem('lc_admin_filters');if(f)FILTERS=JSON.parse(f)}catch(e){}loadDashboard();}}catch(e){}})();
 </script>
 </body>
 </html>
