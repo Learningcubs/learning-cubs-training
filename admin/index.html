@@ -479,7 +479,6 @@ var a=document.createElement('a');
 a.href=url;a.download='training-dashboard-'+new Date().toISOString().split('T')[0]+'.csv';
 a.click();URL.revokeObjectURL(url);
 }
-});
 (function(){try{var s=sessionStorage.getItem('lc_admin');if(s){var d=JSON.parse(s);TOKEN=d.token;ADMIN={name:d.name,branches:d.branches,role:d.role};document.getElementById('loginOverlay').classList.add('hidden');document.getElementById('app').style.display='block';document.getElementById('navUser').textContent=ADMIN.name+' ('+(ADMIN.branches==='All'?'All branches':ADMIN.branches)+')';try{var f=sessionStorage.getItem('lc_admin_filters');if(f)FILTERS=JSON.parse(f)}catch(e){}loadDashboard();}}catch(e){}})();
 </script>
 </body>
